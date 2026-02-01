@@ -14,6 +14,7 @@ import {
   Check
 } from "lucide-react";
 import { useState } from "react";
+import { BookingModal } from "@/components/booking/BookingModal";
 
 // Mock doctor data (in real app, fetch from API)
 const doctorData = {
@@ -67,6 +68,7 @@ export default function DoctorProfile() {
   const { id } = useParams();
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   return (
     <Layout>
@@ -280,19 +282,13 @@ export default function DoctorProfile() {
                 </div>
               </div>
 
-              {/* Book Button - Directly book without auth */}
+              {/* Book Button - Opens booking modal */}
               <Button 
                 variant="hero" 
                 size="default" 
                 className="mt-4 w-full"
                 disabled={!selectedSlot}
-                onClick={() => {
-                  if (selectedSlot) {
-                    // Direct booking without auth requirement
-                    console.log("Booking:", { date: availableSlots[selectedDate].date, slot: selectedSlot });
-                    alert(`Appointment booked for ${availableSlots[selectedDate].date} at ${selectedSlot}`);
-                  }
-                }}
+                onClick={() => setShowBookingModal(true)}
               >
                 {selectedSlot ? "Book Now" : "Select Time"}
               </Button>
@@ -305,6 +301,19 @@ export default function DoctorProfile() {
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      {selectedSlot && (
+        <BookingModal
+          open={showBookingModal}
+          onOpenChange={setShowBookingModal}
+          doctorName={doctorData.name}
+          specialty={doctorData.specialty}
+          selectedDate={availableSlots[selectedDate].date}
+          selectedTime={selectedSlot}
+          fee={doctorData.fee + 50}
+        />
+      )}
     </Layout>
   );
 }
