@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar, Clock, User, Phone, Mail, FileText, Check } from "lucide-react";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const patientSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name too long"),
@@ -74,6 +75,21 @@ export function BookingModal({
     
     // Simulate API call - in production, this would save to database
     await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    // Send SMS notification
+    try {
+      const smsMessage = `আপনার অ্যাপয়েন্টমেন্ট নিশ্চিত হয়েছে।\n\nডাক্তার: ${doctorName}\nতারিখ: ${selectedDate}\nসময়: ${selectedTime}\nফি: ৳${fee}\n\nধন্যবাদ!`;
+      
+      await supabase.functions.invoke("send-sms", {
+        body: {
+          phone: result.data.phone,
+          message: smsMessage,
+        },
+      });
+    } catch (smsError) {
+      console.log("SMS notification failed:", smsError);
+      // Don't fail the booking if SMS fails
+    }
     
     setIsSubmitting(false);
     setIsSuccess(true);
