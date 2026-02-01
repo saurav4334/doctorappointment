@@ -744,7 +744,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_service_role: { Args: never; Returns: boolean }
     }
     Enums: {
       sms_provider_type:
