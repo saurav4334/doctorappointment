@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, ChevronDown, Settings, MessageSquare, LogOut, User } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -10,6 +10,15 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
 
 const services = [
   { name: "Our Doctors", href: "/doctors", description: "Find and book appointments with experienced doctors" },
@@ -17,11 +26,51 @@ const services = [
   { name: "Health Packages", href: "/packages", description: "Affordable health check packages" },
 ];
 
+const adminMenuItems = [
+  { name: "SMS Settings", href: "/admin/sms-settings", icon: MessageSquare, description: "Manage SMS providers" },
+];
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role_key")
+          .eq("user_id", user.id)
+          .eq("is_active", true);
+
+        setIsSuperAdmin(roles?.some(r => r.role_key === "super_admin") || false);
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+      if (!session?.user) {
+        setIsSuperAdmin(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -125,11 +174,49 @@ export function Header() {
 
         {/* CTA Buttons */}
         <div className="hidden items-center gap-3 lg:flex">
-          <Link to="/auth">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-          </Link>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="max-w-[120px] truncate">{user.email?.split("@")[0] || "Account"}</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                {isSuperAdmin && (
+                  <>
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                      Admin Settings
+                    </DropdownMenuLabel>
+                    {adminMenuItems.map((item) => (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link to={item.href} className="flex items-center gap-2 cursor-pointer">
+                          <item.icon className="h-4 w-4" />
+                          {item.name}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/auth">
+              <Button variant="ghost" size="sm">
+                Sign In
+              </Button>
+            </Link>
+          )}
           <Link to="/doctors">
             <Button variant="hero" size="default" className="group">
               Book Appointment
@@ -190,10 +277,36 @@ export function Header() {
             >
               Contact
             </Link>
+            
+            {/* Admin links for mobile */}
+            {isSuperAdmin && (
+              <div className="mt-4 border-t pt-4">
+                <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase">Admin Settings</p>
+                {adminMenuItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="flex items-center gap-2 rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <div className="mt-4 flex flex-col gap-2">
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full">Sign In</Button>
-              </Link>
+              {user ? (
+                <Button variant="outline" className="w-full" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Sign In</Button>
+                </Link>
+              )}
               <Link to="/doctors" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="hero" className="w-full">Book Appointment</Button>
               </Link>
