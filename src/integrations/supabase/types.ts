@@ -562,6 +562,108 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_logs: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          message: string
+          phone_number: string
+          provider_id: string | null
+          provider_message_id: string | null
+          provider_response: Json | null
+          status: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message: string
+          phone_number: string
+          provider_id?: string | null
+          provider_message_id?: string | null
+          provider_response?: Json | null
+          status?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message?: string
+          phone_number?: string
+          provider_id?: string | null
+          provider_message_id?: string | null
+          provider_response?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_logs_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_logs_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "sms_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_providers: {
+        Row: {
+          additional_config: Json | null
+          api_key: string
+          api_url: string
+          client_trans_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          provider_type: Database["public"]["Enums"]["sms_provider_type"]
+          secret_key: string | null
+          sender_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          additional_config?: Json | null
+          api_key: string
+          api_url: string
+          client_trans_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          provider_type: Database["public"]["Enums"]["sms_provider_type"]
+          secret_key?: string | null
+          sender_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          additional_config?: Json | null
+          api_key?: string
+          api_url?: string
+          client_trans_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          provider_type?: Database["public"]["Enums"]["sms_provider_type"]
+          secret_key?: string | null
+          sender_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           content: string
@@ -645,7 +747,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      sms_provider_type:
+        | "khudebarta"
+        | "ssl_wireless"
+        | "bdbulksms"
+        | "muthofun"
+        | "infobip"
+        | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -772,6 +880,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      sms_provider_type: [
+        "khudebarta",
+        "ssl_wireless",
+        "bdbulksms",
+        "muthofun",
+        "infobip",
+        "custom",
+      ],
+    },
   },
 } as const
