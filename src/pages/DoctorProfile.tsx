@@ -226,20 +226,22 @@ export default function DoctorProfile() {
             </div>
           </div>
 
-          {/* Booking Sidebar */}
+          {/* Booking Sidebar - Compact Design */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 rounded-xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="font-display text-lg font-semibold text-foreground">
-                Book an Appointment
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Select a date and time slot to book your appointment
-              </p>
+            <div className="sticky top-20 rounded-xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-base font-semibold text-foreground">
+                  Book Appointment
+                </h3>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-primary">৳{doctorData.fee + 50}</span>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                </div>
+              </div>
 
-              {/* Date Selection */}
-              <div className="mt-6">
-                <p className="mb-3 text-sm font-medium text-foreground">Select Date</p>
-                <div className="flex gap-2 overflow-x-auto pb-2">
+              {/* Date Selection - Compact */}
+              <div className="mt-3">
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
                   {availableSlots.map((day, index) => (
                     <button
                       key={index}
@@ -247,7 +249,7 @@ export default function DoctorProfile() {
                         setSelectedDate(index);
                         setSelectedSlot(null);
                       }}
-                      className={`shrink-0 rounded-lg border px-4 py-2 text-sm transition-colors ${
+                      className={`shrink-0 rounded-md border px-3 py-1.5 text-xs transition-colors ${
                         selectedDate === index
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border hover:border-primary"
@@ -259,15 +261,14 @@ export default function DoctorProfile() {
                 </div>
               </div>
 
-              {/* Time Slots */}
-              <div className="mt-6">
-                <p className="mb-3 text-sm font-medium text-foreground">Available Slots</p>
-                <div className="grid grid-cols-3 gap-2">
+              {/* Time Slots - Compact Grid */}
+              <div className="mt-3">
+                <div className="grid grid-cols-4 gap-1.5">
                   {availableSlots[selectedDate].slots.map((slot) => (
                     <button
                       key={slot}
                       onClick={() => setSelectedSlot(slot)}
-                      className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                      className={`rounded-md border px-2 py-1.5 text-xs transition-colors ${
                         selectedSlot === slot
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border hover:border-primary"
@@ -279,39 +280,26 @@ export default function DoctorProfile() {
                 </div>
               </div>
 
-              {/* Fee Summary */}
-              <div className="mt-6 rounded-lg bg-muted/50 p-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Consultation Fee</span>
-                  <span className="font-medium text-foreground">৳{doctorData.fee}</span>
-                </div>
-                <div className="mt-2 flex justify-between text-sm">
-                  <span className="text-muted-foreground">Booking Fee</span>
-                  <span className="font-medium text-foreground">৳50</span>
-                </div>
-                <div className="mt-3 flex justify-between border-t pt-3">
-                  <span className="font-medium text-foreground">Total</span>
-                  <span className="text-lg font-bold text-primary">৳{doctorData.fee + 50}</span>
-                </div>
-              </div>
+              {/* Book Button - Directly book without auth */}
+              <Button 
+                variant="hero" 
+                size="default" 
+                className="mt-4 w-full"
+                disabled={!selectedSlot}
+                onClick={() => {
+                  if (selectedSlot) {
+                    // Direct booking without auth requirement
+                    console.log("Booking:", { date: availableSlots[selectedDate].date, slot: selectedSlot });
+                    alert(`Appointment booked for ${availableSlots[selectedDate].date} at ${selectedSlot}`);
+                  }
+                }}
+              >
+                {selectedSlot ? "Book Now" : "Select Time"}
+              </Button>
 
-              {/* Book Button */}
-              <Link to="/auth">
-                <Button 
-                  variant="hero" 
-                  size="lg" 
-                  className="mt-6 w-full"
-                  disabled={!selectedSlot}
-                >
-                  {selectedSlot ? "Proceed to Book" : "Select a Time Slot"}
-                </Button>
-              </Link>
-
-              <p className="mt-4 text-center text-xs text-muted-foreground">
+              <p className="mt-2 text-center text-[10px] text-muted-foreground">
                 By booking, you agree to our{" "}
                 <Link to="/terms" className="text-primary hover:underline">Terms</Link>
-                {" "}and{" "}
-                <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
               </p>
             </div>
           </div>
