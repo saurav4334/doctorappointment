@@ -8,6 +8,12 @@ import Doctors from "./pages/Doctors";
 import DoctorProfile from "./pages/DoctorProfile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
+// Admin pages
+import Dashboard from "./pages/admin/Dashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import DoctorManagement from "./pages/admin/DoctorManagement";
+import HospitalManagement from "./pages/admin/HospitalManagement";
 import SMSSettings from "./pages/admin/SMSSettings";
 
 const queryClient = new QueryClient();
@@ -23,7 +29,14 @@ const App = () => (
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/doctors/:id" element={<DoctorProfile />} />
           <Route path="/auth" element={<Auth />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/doctors" element={<DoctorManagement />} />
+          <Route path="/admin/hospitals" element={<HospitalManagement />} />
           <Route path="/admin/sms-settings" element={<SMSSettings />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

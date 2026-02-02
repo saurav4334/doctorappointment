@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Edit, MessageSquare, Send, ArrowLeft } from "lucide-react";
+import { Loader2, Plus, Trash2, Edit, MessageSquare, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -77,11 +77,9 @@ const emptyProvider: Partial<SMSProvider> = {
 };
 
 export default function SMSSettings() {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [providers, setProviders] = useState<SMSProvider[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Partial<SMSProvider> | null>(null);
   const [saving, setSaving] = useState(false);
@@ -89,33 +87,8 @@ export default function SMSSettings() {
   const [testingId, setTestingId] = useState<string | null>(null);
 
   useEffect(() => {
-    checkAdminAndFetch();
-  }, []);
-
-  const checkAdminAndFetch = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role_key")
-      .eq("user_id", user.id)
-      .eq("is_active", true);
-
-    const isAdmin = roles?.some(r => r.role_key === "super_admin");
-    setIsSuperAdmin(!!isAdmin);
-
-    if (!isAdmin) {
-      toast({ title: "Access Denied", description: "You don't have permission to access this page.", variant: "destructive" });
-      navigate("/");
-      return;
-    }
-
     fetchProviders();
-  };
+  }, []);
 
   const fetchProviders = async () => {
     setLoading(true);
@@ -236,25 +209,12 @@ export default function SMSSettings() {
     setTestingId(null);
   };
 
-  if (!isSuperAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">SMS Provider Settings</h1>
-            <p className="text-muted-foreground">Manage SMS gateway configurations for appointment notifications</p>
-          </div>
+    <AdminLayout allowedRoles={["super_admin"]}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-display font-bold">SMS Provider Settings</h1>
+          <p className="text-muted-foreground">Manage SMS gateway configurations for appointment notifications</p>
         </div>
 
         <Card>
@@ -467,6 +427,6 @@ export default function SMSSettings() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
