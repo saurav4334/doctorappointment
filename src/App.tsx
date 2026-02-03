@@ -16,6 +16,7 @@ import DoctorManagement from "./pages/admin/DoctorManagement";
 import HospitalManagement from "./pages/admin/HospitalManagement";
 import AppointmentManagement from "./pages/admin/AppointmentManagement";
 import SMSSettings from "./pages/admin/SMSSettings";
+import ScheduleManagement from "./pages/admin/ScheduleManagement";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/admin/doctors" element={<DoctorManagement />} />
           <Route path="/admin/hospitals" element={<HospitalManagement />} />
           <Route path="/admin/appointments" element={<AppointmentManagement />} />
+          <Route path="/admin/schedule" element={<ScheduleManagement />} />
           <Route path="/admin/sms-settings" element={<SMSSettings />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
