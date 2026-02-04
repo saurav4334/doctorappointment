@@ -188,14 +188,17 @@ Deno.serve(async (req: Request) => {
       );
     }
     
-    // For guest checkout, we need to create or find a guest profile
-    let patientId: string;
+    // For guest checkout, we need to handle patient info differently
+    let patientId: string | null = null;
+    let guestName: string | null = null;
+    let guestPhone: string | null = null;
+    let guestEmail: string | null = null;
     
     if (userId) {
       // Authenticated user - use their profile
       patientId = userId;
       
-      // Update profile with phone if not set
+      // Update profile with phone/name if not set
       await supabase
         .from("profiles")
         .update({ 
@@ -204,36 +207,10 @@ Deno.serve(async (req: Request) => {
         })
         .eq("id", userId);
     } else {
-      // Guest checkout - create a temporary guest entry
-      // First check if phone number already exists in profiles
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("phone", requestData.patientPhone)
-        .maybeSingle();
-      
-      if (existingProfile) {
-        patientId = existingProfile.id;
-      } else {
-        // Create a new guest profile with a generated UUID
-        const guestId = crypto.randomUUID();
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert({
-            id: guestId,
-            full_name: requestData.patientName,
-            phone: requestData.patientPhone,
-          });
-        
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          return new Response(
-            JSON.stringify({ success: false, error: "Failed to create patient profile" }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-          );
-        }
-        patientId = guestId;
-      }
+      // Guest checkout - store guest info directly in appointment
+      guestName = requestData.patientName.trim();
+      guestPhone = requestData.patientPhone.trim();
+      guestEmail = requestData.patientEmail?.trim() || null;
     }
     
     // Create the appointment
@@ -250,6 +227,9 @@ Deno.serve(async (req: Request) => {
         consultation_fee: requestData.consultationFee,
         status: "scheduled",
         payment_status: "pending",
+        guest_name: guestName,
+        guest_phone: guestPhone,
+        guest_email: guestEmail,
       })
       .select("id, appointment_number")
       .single();
@@ -262,7 +242,7 @@ Deno.serve(async (req: Request) => {
       );
     }
     
-    console.log(`Appointment created: ${appointment.id} for patient ${patientId} (guest: ${!userId})`);
+    console.log(`Appointment created: ${appointment.id} for ${patientId ? `user ${patientId}` : `guest ${guestName}`}`);
     
     return new Response(
       JSON.stringify({
