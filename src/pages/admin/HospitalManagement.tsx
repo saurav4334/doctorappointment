@@ -102,9 +102,10 @@ export default function HospitalManagement() {
   const fetchHospitals = async () => {
     setLoading(true);
 
+    // Select only necessary columns for the list view
     const { data, error } = await supabase
       .from("hospitals")
-      .select("*")
+      .select("id, name, slug, type, description, address, city, state, postal_code, phone, email, website, logo_url, status, emergency_services, facilities")
       .order("created_at", { ascending: false });
 
     if (error) {

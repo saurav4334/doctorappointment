@@ -61,12 +61,57 @@ Deno.serve(async (req) => {
       );
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = claimsData.claims.sub as string;
     const userRole = claimsData.claims.role;
     console.log(`SMS request from user: ${userId}, role: ${userRole}`);
 
     // Service role client for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Rate limiting: Check recent SMS sends for this user
+    const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+    const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+    
+    // Check SMS count in the last minute (by phone number to prevent abuse)
+    const { data: recentMinuteSends } = await supabase
+      .from("sms_logs")
+      .select("id")
+      .gte("created_at", oneMinuteAgo);
+    
+    // Check SMS count in the last hour
+    const { data: recentHourSends } = await supabase
+      .from("sms_logs")
+      .select("id")
+      .gte("created_at", oneHourAgo);
+    
+    const minuteCount = recentMinuteSends?.length || 0;
+    const hourCount = recentHourSends?.length || 0;
+    
+    // Rate limits: 10 SMS per minute, 100 per hour (generous for legitimate use)
+    const minuteLimit = 10;
+    const hourLimit = 100;
+    
+    if (minuteCount >= minuteLimit) {
+      console.warn(`Rate limit exceeded: ${minuteCount} SMS in last minute`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Rate limit exceeded. Please wait a minute before sending more SMS." 
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+      );
+    }
+    
+    if (hourCount >= hourLimit) {
+      console.warn(`Hourly rate limit exceeded: ${hourCount} SMS in last hour`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Hourly SMS limit exceeded. Please try again later." 
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+      );
+    }
 
     const { phone, message, providerId, appointmentId }: SMSRequest = await req.json();
 

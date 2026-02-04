@@ -14,20 +14,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-type SMSProvider = {
+type SMSProviderList = {
   id: string;
   name: string;
   provider_type: string;
   api_url: string;
-  api_key: string;
-  secret_key: string | null;
   sender_id: string | null;
   client_trans_id: string | null;
-  additional_config: Record<string, unknown>;
   is_active: boolean;
   is_default: boolean;
   created_at: string;
   updated_at: string;
+};
+
+type SMSProviderFull = SMSProviderList & {
+  api_key: string;
+  secret_key: string | null;
+  additional_config: Record<string, unknown>;
 };
 
 const PROVIDER_CONFIGS: Record<string, { label: string; fields: string[]; defaultUrl: string }> = {
@@ -63,7 +66,7 @@ const PROVIDER_CONFIGS: Record<string, { label: string; fields: string[]; defaul
   },
 };
 
-const emptyProvider: Partial<SMSProvider> = {
+const emptyProvider: Partial<SMSProviderFull> = {
   name: "",
   provider_type: "khudebarta",
   api_url: PROVIDER_CONFIGS.khudebarta.defaultUrl,
@@ -78,13 +81,14 @@ const emptyProvider: Partial<SMSProvider> = {
 
 export default function SMSSettings() {
   const { toast } = useToast();
-  const [providers, setProviders] = useState<SMSProvider[]>([]);
+  const [providers, setProviders] = useState<SMSProviderList[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<Partial<SMSProvider> | null>(null);
+  const [editingProvider, setEditingProvider] = useState<Partial<SMSProviderFull> | null>(null);
   const [saving, setSaving] = useState(false);
   const [testPhone, setTestPhone] = useState("");
   const [testingId, setTestingId] = useState<string | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState(false);
 
   useEffect(() => {
     fetchProviders();
@@ -92,17 +96,43 @@ export default function SMSSettings() {
 
   const fetchProviders = async () => {
     setLoading(true);
+    // Select only necessary columns, exclude sensitive credentials for list view
     const { data, error } = await supabase
       .from("sms_providers")
-      .select("*")
+      .select("id, name, provider_type, api_url, sender_id, client_trans_id, is_active, is_default, created_at, updated_at")
       .order("created_at", { ascending: false });
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setProviders((data as unknown as SMSProvider[]) || []);
+      setProviders((data as unknown as SMSProviderList[]) || []);
     }
     setLoading(false);
+  };
+
+  // Fetch full provider details (including credentials) only when editing
+  const fetchProviderDetails = async (id: string): Promise<SMSProviderFull | null> => {
+    const { data, error } = await supabase
+      .from("sms_providers")
+      .select("*")
+      .eq("id", id)
+      .single();
+    
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return null;
+    }
+    return data as unknown as SMSProviderFull;
+  };
+
+  const handleOpenEdit = async (provider: SMSProviderList) => {
+    setLoadingProvider(true);
+    const fullProvider = await fetchProviderDetails(provider.id);
+    setLoadingProvider(false);
+    if (fullProvider) {
+      setEditingProvider(fullProvider);
+      setShowDialog(true);
+    }
   };
 
   const handleProviderTypeChange = (type: string) => {
@@ -180,7 +210,7 @@ export default function SMSSettings() {
     }
   };
 
-  const handleTestSMS = async (provider: SMSProvider) => {
+  const handleTestSMS = async (provider: SMSProviderList) => {
     if (!testPhone) {
       toast({ title: "Enter Phone", description: "Please enter a phone number to test", variant: "destructive" });
       return;
@@ -293,9 +323,14 @@ export default function SMSSettings() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => { setEditingProvider(provider); setShowDialog(true); }}
+                            onClick={() => handleOpenEdit(provider)}
+                            disabled={loadingProvider}
                           >
-                            <Edit className="h-4 w-4" />
+                            {loadingProvider ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Edit className="h-4 w-4" />
+                            )}
                           </Button>
                           <Button
                             variant="destructive"
