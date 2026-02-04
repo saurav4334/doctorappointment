@@ -34,6 +34,38 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    
+    // Check for authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized: Missing or invalid authorization header" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+
+    // Create client with user's auth context to verify the token
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error("Auth error:", claimsError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized: Invalid token" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+    const userRole = claimsData.claims.role;
+    console.log(`SMS request from user: ${userId}, role: ${userRole}`);
+
+    // Service role client for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { phone, message, providerId, appointmentId }: SMSRequest = await req.json();
@@ -118,7 +150,7 @@ Deno.serve(async (req) => {
         smsResponse = await sendViaCustom(provider, formattedPhone, message);
     }
 
-    // Log the SMS
+    // Log the SMS with user ID for auditing
     await supabase.from("sms_logs").insert({
       provider_id: provider.id,
       phone_number: formattedPhone,
@@ -128,7 +160,10 @@ Deno.serve(async (req) => {
       provider_response: smsResponse.rawResponse || null,
       error_message: smsResponse.error || null,
       appointment_id: appointmentId || null,
+      // Note: sent_by_user_id would need a migration to add this column
     });
+    
+    console.log(`SMS ${smsResponse.success ? "sent" : "failed"} by user ${userId} to ${formattedPhone}`);
 
     return new Response(
       JSON.stringify({
