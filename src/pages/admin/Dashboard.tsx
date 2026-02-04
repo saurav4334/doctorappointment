@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import {
   Users,
   Stethoscope,
@@ -38,6 +39,12 @@ interface RecentAppointment {
   status: string;
 }
 
+interface ChartDataPoint {
+  name: string;
+  appointments: number;
+  completed: number;
+}
+
 export default function Dashboard() {
   const { role, hospitalId, doctorId, user } = useAdminAuth();
   const [stats, setStats] = useState<Stats>({
@@ -51,12 +58,14 @@ export default function Dashboard() {
     todayAppointments: 0,
   });
   const [recentAppointments, setRecentAppointments] = useState<RecentAppointment[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (role) {
       fetchStats();
       fetchRecentAppointments();
+      fetchChartData();
     }
   }, [role, hospitalId, doctorId]);
 
@@ -164,16 +173,43 @@ export default function Dashboard() {
     }
   };
 
-  // Mock chart data - in production, fetch from database with date aggregation
-  const chartData = [
-    { name: "Mon", appointments: 12, completed: 10 },
-    { name: "Tue", appointments: 19, completed: 15 },
-    { name: "Wed", appointments: 15, completed: 12 },
-    { name: "Thu", appointments: 22, completed: 18 },
-    { name: "Fri", appointments: 25, completed: 20 },
-    { name: "Sat", appointments: 18, completed: 16 },
-    { name: "Sun", appointments: 8, completed: 6 },
-  ];
+  const fetchChartData = async () => {
+    try {
+      // Get appointments for the last 7 days
+      const days: ChartDataPoint[] = [];
+      const today = new Date();
+
+      for (let i = 6; i >= 0; i--) {
+        const date = subDays(today, i);
+        const dateStr = format(date, "yyyy-MM-dd");
+        const dayName = format(date, "EEE");
+
+        let query = supabase
+          .from("appointments")
+          .select("id, status")
+          .eq("appointment_date", dateStr);
+
+        if (role === "hospital_admin" && hospitalId) {
+          query = query.eq("hospital_id", hospitalId);
+        } else if (role === "doctor" && doctorId) {
+          query = query.eq("doctor_id", doctorId);
+        }
+
+        const { data } = await query;
+        const appointments = data || [];
+
+        days.push({
+          name: dayName,
+          appointments: appointments.length,
+          completed: appointments.filter((a) => a.status === "completed").length,
+        });
+      }
+
+      setChartData(days);
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+    }
+  };
 
   const statusData = [
     { name: "Scheduled", value: stats.pendingAppointments, color: "hsl(45, 93%, 47%)" },
