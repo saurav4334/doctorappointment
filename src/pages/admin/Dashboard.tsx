@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -8,11 +7,16 @@ import {
   Stethoscope,
   Building2,
   Calendar,
-  TrendingUp,
   Clock,
   CheckCircle,
-  XCircle,
+  TrendingUp,
 } from "lucide-react";
+import { StatCard } from "@/components/admin/dashboard/StatCard";
+import { AppointmentChart } from "@/components/admin/dashboard/AppointmentChart";
+import { StatusDonutChart } from "@/components/admin/dashboard/StatusDonutChart";
+import { RecentAppointments } from "@/components/admin/dashboard/RecentAppointments";
+import { QuickActions } from "@/components/admin/dashboard/QuickActions";
+import { WelcomeHeader } from "@/components/admin/dashboard/WelcomeHeader";
 
 interface Stats {
   totalDoctors: number;
@@ -25,8 +29,17 @@ interface Stats {
   todayAppointments: number;
 }
 
+interface RecentAppointment {
+  id: string;
+  patient_name: string;
+  doctor_name: string;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+}
+
 export default function Dashboard() {
-  const { role, hospitalId, doctorId } = useAdminAuth();
+  const { role, hospitalId, doctorId, user } = useAdminAuth();
   const [stats, setStats] = useState<Stats>({
     totalDoctors: 0,
     totalHospitals: 0,
@@ -37,11 +50,13 @@ export default function Dashboard() {
     cancelledAppointments: 0,
     todayAppointments: 0,
   });
+  const [recentAppointments, setRecentAppointments] = useState<RecentAppointment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (role) {
       fetchStats();
+      fetchRecentAppointments();
     }
   }, [role, hospitalId, doctorId]);
 
@@ -50,7 +65,6 @@ export default function Dashboard() {
     const today = new Date().toISOString().split("T")[0];
 
     try {
-      // Base queries depend on role
       let doctorsCount = 0;
       let hospitalsCount = 0;
       let appointments: { id: string; status: string | null; appointment_date: string }[] = [];
@@ -80,7 +94,6 @@ export default function Dashboard() {
           .eq("doctor_id", doctorId);
         appointments = appts || [];
       } else {
-        // Super admin - get all
         const [docRes, hospRes, apptRes] = await Promise.all([
           supabase.from("doctors").select("id", { count: "exact" }),
           supabase.from("hospitals").select("id", { count: "exact" }),
@@ -111,69 +124,111 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const fetchRecentAppointments = async () => {
+    try {
+      let query = supabase
+        .from("appointments")
+        .select(`
+          id,
+          appointment_date,
+          appointment_time,
+          status,
+          patient:profiles!appointments_patient_id_fkey(full_name),
+          doctor:doctors!appointments_doctor_id_fkey(full_name)
+        `)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (role === "hospital_admin" && hospitalId) {
+        query = query.eq("hospital_id", hospitalId);
+      } else if (role === "doctor" && doctorId) {
+        query = query.eq("doctor_id", doctorId);
+      }
+
+      const { data } = await query;
+
+      if (data) {
+        setRecentAppointments(
+          data.map((apt) => ({
+            id: apt.id,
+            patient_name: apt.patient?.full_name || "Unknown Patient",
+            doctor_name: apt.doctor?.full_name || "Unknown Doctor",
+            appointment_date: apt.appointment_date,
+            appointment_time: apt.appointment_time,
+            status: apt.status || "scheduled",
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching recent appointments:", error);
+    }
+  };
+
+  // Mock chart data - in production, fetch from database with date aggregation
+  const chartData = [
+    { name: "Mon", appointments: 12, completed: 10 },
+    { name: "Tue", appointments: 19, completed: 15 },
+    { name: "Wed", appointments: 15, completed: 12 },
+    { name: "Thu", appointments: 22, completed: 18 },
+    { name: "Fri", appointments: 25, completed: 20 },
+    { name: "Sat", appointments: 18, completed: 16 },
+    { name: "Sun", appointments: 8, completed: 6 },
+  ];
+
+  const statusData = [
+    { name: "Scheduled", value: stats.pendingAppointments, color: "hsl(45, 93%, 47%)" },
+    { name: "Completed", value: stats.completedAppointments, color: "hsl(160, 84%, 39%)" },
+    { name: "Cancelled", value: stats.cancelledAppointments, color: "hsl(0, 84%, 60%)" },
+  ];
+
   const statCards = [
     {
       title: "Total Doctors",
       value: stats.totalDoctors,
       icon: Stethoscope,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      variant: "primary" as const,
       show: role !== "doctor",
     },
     {
       title: "Total Hospitals",
       value: stats.totalHospitals,
       icon: Building2,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      variant: "secondary" as const,
       show: role === "super_admin",
     },
     {
       title: "Total Patients",
       value: stats.totalPatients,
       icon: Users,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      variant: "accent" as const,
       show: role === "super_admin",
     },
     {
       title: "Total Appointments",
       value: stats.totalAppointments,
       icon: Calendar,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      variant: "default" as const,
       show: true,
     },
     {
       title: "Today's Appointments",
       value: stats.todayAppointments,
       icon: Clock,
-      color: "text-cyan-600",
-      bgColor: "bg-cyan-100",
+      variant: "primary" as const,
       show: true,
     },
     {
       title: "Pending",
       value: stats.pendingAppointments,
       icon: TrendingUp,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100",
+      variant: "default" as const,
       show: true,
     },
     {
       title: "Completed",
       value: stats.completedAppointments,
       icon: CheckCircle,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-100",
-      show: true,
-    },
-    {
-      title: "Cancelled",
-      value: stats.cancelledAppointments,
-      icon: XCircle,
-      color: "text-red-600",
-      bgColor: "bg-red-100",
+      variant: "secondary" as const,
       show: true,
     },
   ];
@@ -181,60 +236,57 @@ export default function Dashboard() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here's an overview of your{" "}
-            {role === "super_admin" ? "platform" : role === "hospital_admin" ? "hospital" : "practice"}.
-          </p>
-        </div>
+        {/* Welcome Header */}
+        {role && <WelcomeHeader role={role} userName={user?.email?.split("@")[0]} />}
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Stats Grid */}
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {statCards
             .filter((card) => card.show)
+            .slice(0, 4)
             .map((card) => (
-              <Card key={card.title} className="card-shadow hover:card-shadow-hover transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {card.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-lg ${card.bgColor}`}>
-                    <card.icon className={`h-4 w-4 ${card.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {loading ? "..." : card.value.toLocaleString()}
-                  </div>
-                </CardContent>
-              </Card>
+              <StatCard
+                key={card.title}
+                title={card.title}
+                value={card.value}
+                icon={card.icon}
+                variant={card.variant}
+                loading={loading}
+              />
             ))}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates across the platform</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Activity feed coming soon...
-              </p>
-            </CardContent>
-          </Card>
+        {/* Secondary Stats */}
+        <div className="grid gap-4 grid-cols-3">
+          {statCards
+            .filter((card) => card.show)
+            .slice(4)
+            .map((card) => (
+              <StatCard
+                key={card.title}
+                title={card.title}
+                value={card.value}
+                icon={card.icon}
+                variant={card.variant}
+                loading={loading}
+              />
+            ))}
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common tasks you can perform</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Use the sidebar to navigate to different sections.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Charts Row */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <AppointmentChart data={chartData} loading={loading} />
+          </div>
+          <StatusDonutChart data={statusData} loading={loading} />
+        </div>
+
+        {/* Bottom Row */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <RecentAppointments appointments={recentAppointments} loading={loading} />
+          </div>
+          {role && <QuickActions role={role} />}
         </div>
       </div>
     </AdminLayout>
