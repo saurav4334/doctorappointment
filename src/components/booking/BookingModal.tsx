@@ -21,7 +21,11 @@ type PatientFormData = z.infer<typeof patientSchema>;
 interface BookingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  doctorId: string;
   doctorName: string;
+  hospitalId: string;
+  hospitalName: string;
+  departmentId?: string;
   specialty: string;
   selectedDate: string;
   selectedTime: string;
@@ -31,7 +35,11 @@ interface BookingModalProps {
 export function BookingModal({
   open,
   onOpenChange,
+  doctorId,
   doctorName,
+  hospitalId,
+  hospitalName,
+  departmentId,
   specialty,
   selectedDate,
   selectedTime,
@@ -40,6 +48,7 @@ export function BookingModal({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [appointmentNumber, setAppointmentNumber] = useState<string | null>(null);
   const [formData, setFormData] = useState<PatientFormData>({
     fullName: "",
     phone: "",
@@ -53,6 +62,66 @@ export function BookingModal({
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  // Parse selected date to ISO format (YYYY-MM-DD)
+  const parseSelectedDate = (dateStr: string): string => {
+    // Handle formats like "Today, Feb 1", "Tomorrow, Feb 2", "Sun, Feb 3"
+    const today = new Date();
+    const year = today.getFullYear();
+    
+    if (dateStr.toLowerCase().includes("today")) {
+      return today.toISOString().split("T")[0];
+    }
+    if (dateStr.toLowerCase().includes("tomorrow")) {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      return tomorrow.toISOString().split("T")[0];
+    }
+    
+    // Parse month and day from format like "Sun, Feb 3"
+    const monthMap: { [key: string]: number } = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+    };
+    const parts = dateStr.toLowerCase().split(/[,\s]+/);
+    for (const part of parts) {
+      const monthKey = part.substring(0, 3);
+      if (monthMap[monthKey] !== undefined) {
+        const dayStr = parts[parts.indexOf(part) + 1];
+        const day = parseInt(dayStr, 10);
+        if (!isNaN(day)) {
+          const date = new Date(year, monthMap[monthKey], day);
+          // If date is in the past, assume next year
+          if (date < today) {
+            date.setFullYear(year + 1);
+          }
+          return date.toISOString().split("T")[0];
+        }
+      }
+    }
+    
+    // Fallback to today
+    return today.toISOString().split("T")[0];
+  };
+
+  // Parse time to 24-hour format (HH:MM:SS)
+  const parseSelectedTime = (timeStr: string): string => {
+    // Handle formats like "10:30 AM", "2:00 PM"
+    const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (!match) return "09:00:00";
+    
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const period = match[3]?.toUpperCase();
+    
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+    
+    return `${hours.toString().padStart(2, "0")}:${minutes}:00`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,31 +142,70 @@ export function BookingModal({
 
     setIsSubmitting(true);
     
-    // Simulate API call - in production, this would save to database
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    // Send SMS notification
     try {
-      const smsMessage = `আপনার অ্যাপয়েন্টমেন্ট নিশ্চিত হয়েছে।\n\nডাক্তার: ${doctorName}\nতারিখ: ${selectedDate}\nসময়: ${selectedTime}\nফি: ৳${fee}\n\nধন্যবাদ!`;
-      
-      await supabase.functions.invoke("send-sms", {
+      // Create appointment via edge function
+      const { data: sessionData } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (sessionData?.session?.access_token) {
+        headers["Authorization"] = `Bearer ${sessionData.session.access_token}`;
+      }
+
+      const appointmentResponse = await supabase.functions.invoke("create-appointment", {
         body: {
-          phone: result.data.phone,
-          message: smsMessage,
+          doctorId,
+          hospitalId,
+          departmentId: departmentId || null,
+          appointmentDate: parseSelectedDate(selectedDate),
+          appointmentTime: parseSelectedTime(selectedTime),
+          patientName: result.data.fullName.trim(),
+          patientPhone: result.data.phone.trim(),
+          patientEmail: result.data.email?.trim() || null,
+          symptoms: result.data.symptoms?.trim() || null,
+          consultationFee: fee,
         },
       });
-    } catch (smsError) {
-      console.log("SMS notification failed:", smsError);
-      // Don't fail the booking if SMS fails
+
+      if (appointmentResponse.error || !appointmentResponse.data?.success) {
+        throw new Error(appointmentResponse.data?.error || "Failed to create appointment");
+      }
+
+      const appointmentData = appointmentResponse.data.appointment;
+      setAppointmentNumber(appointmentData.appointmentNumber);
+      
+      // Send SMS notification (optional, don't fail if it fails)
+      try {
+        const smsMessage = `আপনার অ্যাপয়েন্টমেন্ট নিশ্চিত হয়েছে।\n\nবুকিং নম্বর: ${appointmentData.appointmentNumber}\nডাক্তার: ${doctorName}\nতারিখ: ${selectedDate}\nসময়: ${selectedTime}\nফি: ৳${fee}\n\nধন্যবাদ!`;
+        
+        await supabase.functions.invoke("send-sms", {
+          body: {
+            phone: result.data.phone,
+            message: smsMessage,
+            appointmentId: appointmentData.id,
+          },
+        });
+      } catch (smsError) {
+        console.log("SMS notification failed:", smsError);
+        // Don't fail the booking if SMS fails
+      }
+      
+      setIsSuccess(true);
+      
+      toast({
+        title: "Appointment Booked!",
+        description: `Your appointment with ${doctorName} is confirmed. Booking #${appointmentData.appointmentNumber}`,
+      });
+    } catch (error) {
+      console.error("Booking error:", error);
+      toast({
+        title: "Booking Failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    
-    toast({
-      title: "Appointment Booked!",
-      description: `Your appointment with ${doctorName} is confirmed for ${selectedDate} at ${selectedTime}.`,
-    });
   };
 
   const handleClose = () => {
@@ -108,6 +216,7 @@ export function BookingModal({
         setFormData({ fullName: "", phone: "", email: "", symptoms: "" });
         setErrors({});
         setIsSuccess(false);
+        setAppointmentNumber(null);
       }, 300);
     }
   };
@@ -117,12 +226,17 @@ export function BookingModal({
       <DialogContent className="max-w-md p-0 overflow-hidden">
         {isSuccess ? (
           <div className="p-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <Check className="h-8 w-8 text-green-600" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+              <Check className="h-8 w-8 text-emerald-600" />
             </div>
             <h3 className="font-display text-xl font-semibold text-foreground">
               Booking Confirmed!
             </h3>
+            {appointmentNumber && (
+              <p className="mt-2 text-sm font-medium text-primary">
+                Booking #{appointmentNumber}
+              </p>
+            )}
             <p className="mt-2 text-sm text-muted-foreground">
               Your appointment with {doctorName} is confirmed for {selectedDate} at {selectedTime}.
             </p>
