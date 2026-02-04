@@ -86,9 +86,10 @@ export default function DoctorManagement() {
   const fetchDoctors = async () => {
     setLoading(true);
 
+    // Select only necessary columns for the list view
     let query = supabase
       .from("doctors")
-      .select("*")
+      .select("id, full_name, title, specializations, qualifications, experience_years, consultation_fee, photo_url, bio, is_active, is_featured, rating, total_reviews, gender")
       .order("created_at", { ascending: false });
 
     // Hospital admins see only their hospital's doctors
