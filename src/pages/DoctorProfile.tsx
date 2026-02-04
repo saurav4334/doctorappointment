@@ -18,12 +18,14 @@ import { BookingModal } from "@/components/booking/BookingModal";
 
 // Mock doctor data (in real app, fetch from API)
 const doctorData = {
-  id: "1",
+  id: "550e8400-e29b-41d4-a716-446655440001",
   name: "Dr. Sarah Ahmed",
   title: "MBBS, MD (Cardiology), FACC",
   specialty: "Cardiologist",
   department: "Cardiology",
+  departmentId: "550e8400-e29b-41d4-a716-446655440010",
   hospital: "City General Hospital",
+  hospitalId: "550e8400-e29b-41d4-a716-446655440020",
   location: "Gulshan, Dhaka",
   experience: 15,
   rating: 4.9,
@@ -307,7 +309,11 @@ export default function DoctorProfile() {
         <BookingModal
           open={showBookingModal}
           onOpenChange={setShowBookingModal}
+          doctorId={doctorData.id}
           doctorName={doctorData.name}
+          hospitalId={doctorData.hospitalId}
+          hospitalName={doctorData.hospital}
+          departmentId={doctorData.departmentId}
           specialty={doctorData.specialty}
           selectedDate={availableSlots[selectedDate].date}
           selectedTime={selectedSlot}
