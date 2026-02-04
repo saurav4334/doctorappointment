@@ -104,6 +104,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
@@ -195,6 +202,13 @@ export type Database = {
             referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "doctor_hospitals_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       doctor_schedules: {
@@ -250,6 +264,13 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_schedules_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -369,6 +390,13 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_departments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -741,7 +769,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      hospitals_public: {
+        Row: {
+          banner_url: string | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          emergency_services: boolean | null
+          facilities: string[] | null
+          id: string | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          name: string | null
+          slug: string | null
+          state: string | null
+          status: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          emergency_services?: boolean | null
+          facilities?: string[] | null
+          id?: string | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string | null
+          slug?: string | null
+          state?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          emergency_services?: boolean | null
+          facilities?: string[] | null
+          id?: string | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string | null
+          slug?: string | null
+          state?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       is_service_role: { Args: never; Returns: boolean }
