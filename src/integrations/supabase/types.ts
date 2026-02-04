@@ -25,10 +25,13 @@ export type Database = {
           department_id: string | null
           doctor_id: string
           end_time: string | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
           hospital_id: string
           id: string
           notes: string | null
-          patient_id: string
+          patient_id: string | null
           payment_method: string | null
           payment_status: string | null
           reason: string | null
@@ -47,10 +50,13 @@ export type Database = {
           department_id?: string | null
           doctor_id: string
           end_time?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
           hospital_id: string
           id?: string
           notes?: string | null
-          patient_id: string
+          patient_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
           reason?: string | null
@@ -69,10 +75,13 @@ export type Database = {
           department_id?: string | null
           doctor_id?: string
           end_time?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
           hospital_id?: string
           id?: string
           notes?: string | null
-          patient_id?: string
+          patient_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
           reason?: string | null
