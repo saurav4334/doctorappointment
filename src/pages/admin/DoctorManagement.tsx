@@ -215,133 +215,211 @@ export default function DoctorManagement() {
 
   return (
     <AdminLayout allowedRoles={["super_admin", "hospital_admin"]}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 md:space-y-6">
+        {/* Header - Responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold">Doctor Management</h1>
-            <p className="text-muted-foreground">Manage doctor profiles and information</p>
+            <h1 className="text-2xl md:text-3xl font-display font-bold">Doctor Management</h1>
+            <p className="text-muted-foreground text-sm md:text-base">Manage doctor profiles and information</p>
           </div>
           {role === "super_admin" && (
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Doctor
             </Button>
           )}
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+        {/* Search & Filters Card */}
+        <Card className="rounded-2xl">
+          <CardHeader className="py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle>All Doctors</CardTitle>
+                <CardTitle className="text-lg">All Doctors</CardTitle>
                 <CardDescription>{doctors.length} doctors registered</CardDescription>
               </div>
-              <div className="relative">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search doctors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 w-64"
+                  className="pl-9"
                 />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin" />
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Doctor</TableHead>
-                    <TableHead>Specializations</TableHead>
-                    <TableHead>Experience</TableHead>
-                    <TableHead>Fee</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredDoctors.map((doctor) => (
-                    <TableRow key={doctor.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Doctor</TableHead>
+                        <TableHead>Specializations</TableHead>
+                        <TableHead>Experience</TableHead>
+                        <TableHead>Fee</TableHead>
+                        <TableHead>Rating</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDoctors.map((doctor) => (
+                        <TableRow key={doctor.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarImage src={doctor.photo_url || ""} />
+                                <AvatarFallback className="bg-primary/10 text-primary">
+                                  {doctor.full_name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">
+                                  {doctor.title} {doctor.full_name}
+                                </p>
+                                {doctor.is_featured && (
+                                  <Badge variant="secondary" className="text-xs mt-1">
+                                    <Star className="h-3 w-3 mr-1" />
+                                    Featured
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {doctor.specializations?.slice(0, 2).map((spec) => (
+                                <Badge key={spec} variant="outline" className="text-xs">
+                                  {spec}
+                                </Badge>
+                              ))}
+                              {(doctor.specializations?.length || 0) > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{(doctor.specializations?.length || 0) - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>{doctor.experience_years || 0} years</TableCell>
+                          <TableCell>৳{doctor.consultation_fee || 0}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                              <span>{doctor.rating || 0}</span>
+                              <span className="text-muted-foreground text-xs">
+                                ({doctor.total_reviews || 0})
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={doctor.is_active ?? false}
+                              onCheckedChange={() => handleToggleActive(doctor)}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenDialog(doctor)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            {role === "super_admin" && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDelete(doctor.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="lg:hidden divide-y">
+                  {filteredDoctors.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <p className="font-medium">No doctors found</p>
+                      <p className="text-sm">Try adjusting your search</p>
+                    </div>
+                  ) : (
+                    filteredDoctors.map((doctor) => (
+                      <div key={doctor.id} className="p-4 hover:bg-muted/30 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-12 w-12 shrink-0">
                             <AvatarImage src={doctor.photo_url || ""} />
-                            <AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary text-lg">
                               {doctor.full_name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-medium">
-                              {doctor.title} {doctor.full_name}
-                            </p>
-                            {doctor.is_featured && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Star className="h-3 w-3 mr-1" />
-                                Featured
-                              </Badge>
-                            )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <p className="font-semibold truncate">
+                                  {doctor.title} {doctor.full_name}
+                                </p>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {doctor.specializations?.slice(0, 2).map((spec) => (
+                                    <Badge key={spec} variant="outline" className="text-xs">
+                                      {spec}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <Switch
+                                checked={doctor.is_active ?? false}
+                                onCheckedChange={() => handleToggleActive(doctor)}
+                              />
+                            </div>
+                            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                              <span>{doctor.experience_years || 0} yrs exp</span>
+                              <span>৳{doctor.consultation_fee || 0}</span>
+                              <span className="flex items-center gap-1">
+                                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                {doctor.rating || 0}
+                              </span>
+                            </div>
+                            <div className="flex gap-2 mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleOpenDialog(doctor)}
+                                className="flex-1"
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              {role === "super_admin" && (
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDelete(doctor.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {doctor.specializations?.slice(0, 2).map((spec) => (
-                            <Badge key={spec} variant="outline" className="text-xs">
-                              {spec}
-                            </Badge>
-                          ))}
-                          {(doctor.specializations?.length || 0) > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{(doctor.specializations?.length || 0) - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{doctor.experience_years || 0} years</TableCell>
-                      <TableCell>৳{doctor.consultation_fee || 0}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{doctor.rating || 0}</span>
-                          <span className="text-muted-foreground text-xs">
-                            ({doctor.total_reviews || 0})
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={doctor.is_active ?? false}
-                          onCheckedChange={() => handleToggleActive(doctor)}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenDialog(doctor)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        {role === "super_admin" && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDelete(doctor.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
