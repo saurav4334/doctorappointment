@@ -837,7 +837,9 @@ export type Database = {
       }
     }
     Functions: {
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_service_role: { Args: never; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       sms_provider_type:
