@@ -61,7 +61,7 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
@@ -77,8 +77,23 @@ export default function AuthPage() {
         return;
       }
 
-      toast.success("Welcome back!");
-      navigate("/");
+      // Check if user has admin role and redirect accordingly
+      if (data.user) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role_key")
+          .eq("user_id", data.user.id)
+          .eq("is_active", true);
+
+        const hasAdminRole = roles?.some((r) => 
+          ["super_admin", "hospital_admin", "doctor"].includes(r.role_key)
+        );
+
+        toast.success("Welcome back!");
+        navigate(hasAdminRole ? "/admin" : "/");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       toast.error("An unexpected error occurred");
     } finally {
