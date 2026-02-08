@@ -271,29 +271,29 @@ export default function Dashboard() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 md:space-y-8">
         {/* Welcome Header */}
         {role && <WelcomeHeader role={role} userName={user?.email?.split("@")[0]} />}
 
-        {/* Stats Grid */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+        {/* Stats Grid - Responsive */}
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {statCards
             .filter((card) => card.show)
             .slice(0, 4)
-            .map((card) => (
+            .map((card, index) => (
               <StatCard
                 key={card.title}
                 title={card.title}
                 value={card.value}
                 icon={card.icon}
-                variant={card.variant}
+                variant={index === 0 ? "gradient" : card.variant}
                 loading={loading}
               />
             ))}
         </div>
 
-        {/* Secondary Stats */}
-        <div className="grid gap-4 grid-cols-3">
+        {/* Secondary Stats - Responsive */}
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
           {statCards
             .filter((card) => card.show)
             .slice(4)
@@ -309,16 +309,16 @@ export default function Dashboard() {
             ))}
         </div>
 
-        {/* Charts Row */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        {/* Charts Row - Stack on mobile */}
+        <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <AppointmentChart data={chartData} loading={loading} />
           </div>
           <StatusDonutChart data={statusData} loading={loading} />
         </div>
 
-        {/* Bottom Row */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        {/* Bottom Row - Stack on mobile */}
+        <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <RecentAppointments appointments={recentAppointments} loading={loading} />
           </div>

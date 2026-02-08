@@ -11,33 +11,33 @@ export function StatusDonutChart({ data, loading = false }: StatusDonutChartProp
 
   if (loading) {
     return (
-      <Card className="card-shadow">
-        <CardHeader>
+      <Card className="rounded-2xl overflow-hidden">
+        <CardHeader className="bg-muted/30 border-b">
           <CardTitle className="text-lg">Appointment Status</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-[250px] w-full bg-muted animate-pulse rounded-lg" />
+        <CardContent className="p-4 md:p-6">
+          <div className="h-[200px] sm:h-[220px] w-full bg-muted animate-pulse rounded-lg" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="card-shadow">
-      <CardHeader className="pb-2">
+    <Card className="rounded-2xl overflow-hidden">
+      <CardHeader className="bg-muted/30 border-b py-4">
         <CardTitle className="text-lg font-display">Appointment Status</CardTitle>
         <p className="text-sm text-muted-foreground">Distribution by current status</p>
       </CardHeader>
-      <CardContent>
-        <div className="h-[200px] w-full relative">
+      <CardContent className="p-4 md:p-6">
+        <div className="h-[180px] sm:h-[200px] w-full relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
+                innerRadius={50}
+                outerRadius={70}
                 paddingAngle={4}
                 dataKey="value"
                 strokeWidth={0}
@@ -50,8 +50,9 @@ export function StatusDonutChart({ data, loading = false }: StatusDonutChartProp
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
-                  borderRadius: "0.5rem",
-                  boxShadow: "var(--card-shadow)",
+                  borderRadius: "0.75rem",
+                  boxShadow: "0 4px 20px -4px rgba(0,0,0,0.1)",
+                  padding: "12px",
                 }}
                 formatter={(value: number) => [value, "Count"]}
               />
@@ -60,23 +61,23 @@ export function StatusDonutChart({ data, loading = false }: StatusDonutChartProp
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
-              <p className="text-3xl font-bold font-display">{total}</p>
+              <p className="text-2xl sm:text-3xl font-bold font-display">{total}</p>
               <p className="text-xs text-muted-foreground">Total</p>
             </div>
           </div>
         </div>
         {/* Legend */}
-        <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-4 pt-4 border-t">
           {data.map((item) => (
             <div key={item.name} className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full shrink-0"
                 style={{ backgroundColor: item.color }}
               />
-              <span className="text-sm text-muted-foreground truncate">
+              <span className="text-xs sm:text-sm text-muted-foreground truncate">
                 {item.name}
               </span>
-              <span className="text-sm font-medium ml-auto">{item.value}</span>
+              <span className="text-xs sm:text-sm font-medium ml-auto">{item.value}</span>
             </div>
           ))}
         </div>

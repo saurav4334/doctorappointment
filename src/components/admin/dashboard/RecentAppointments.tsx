@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface Appointment {
   id: string;
@@ -29,14 +31,14 @@ const statusColors: Record<string, string> = {
 export function RecentAppointments({ appointments, loading = false }: RecentAppointmentsProps) {
   if (loading) {
     return (
-      <Card className="card-shadow">
-        <CardHeader>
+      <Card className="rounded-2xl overflow-hidden">
+        <CardHeader className="bg-muted/30 border-b">
           <CardTitle className="text-lg">Recent Appointments</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-0">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-muted animate-pulse rounded-full" />
+            <div key={i} className="flex items-center gap-4 p-4 border-b last:border-0">
+              <div className="w-10 h-10 bg-muted animate-pulse rounded-full shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
                 <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
@@ -49,26 +51,35 @@ export function RecentAppointments({ appointments, loading = false }: RecentAppo
   }
 
   return (
-    <Card className="card-shadow">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-display">Recent Appointments</CardTitle>
-        <p className="text-sm text-muted-foreground">Latest booking activity</p>
+    <Card className="rounded-2xl overflow-hidden">
+      <CardHeader className="bg-muted/30 border-b flex flex-row items-center justify-between py-4">
+        <div>
+          <CardTitle className="text-lg font-display">Recent Appointments</CardTitle>
+          <p className="text-sm text-muted-foreground">Latest booking activity</p>
+        </div>
+        <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
+          <Link to="/admin/appointments">
+            View All
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {appointments.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-12 text-muted-foreground">
             <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>No recent appointments</p>
+            <p className="font-medium">No recent appointments</p>
+            <p className="text-sm">New appointments will appear here</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="divide-y">
             {appointments.map((apt) => (
               <div
                 key={apt.id}
-                className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-3 sm:gap-4 p-4 hover:bg-muted/30 transition-colors"
               >
-                <Avatar className="h-10 w-10 border-2 border-primary/10">
-                  <AvatarFallback className="bg-primary/5 text-primary font-medium">
+                <Avatar className="h-10 w-10 border-2 border-primary/10 shrink-0">
+                  <AvatarFallback className="bg-primary/5 text-primary font-medium text-sm">
                     {apt.patient_name
                       .split(" ")
                       .map((n) => n[0])
@@ -83,19 +94,26 @@ export function RecentAppointments({ appointments, loading = false }: RecentAppo
                     with {apt.doctor_name}
                   </p>
                 </div>
-                <div className="text-right shrink-0">
+                {/* Date/Time - Stack on mobile */}
+                <div className="hidden sm:block text-right shrink-0">
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                     <Calendar className="h-3 w-3" />
                     {format(new Date(apt.appointment_date), "MMM d")}
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    {apt.appointment_time}
+                    {apt.appointment_time?.slice(0, 5)}
                   </div>
+                </div>
+                {/* Mobile: Show date inline */}
+                <div className="sm:hidden text-right shrink-0">
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(apt.appointment_date), "MMM d")}
+                  </p>
                 </div>
                 <Badge
                   variant="outline"
-                  className={statusColors[apt.status] || statusColors.scheduled}
+                  className={`shrink-0 text-xs ${statusColors[apt.status] || statusColors.scheduled}`}
                 >
                   {apt.status}
                 </Badge>
@@ -103,6 +121,15 @@ export function RecentAppointments({ appointments, loading = false }: RecentAppo
             ))}
           </div>
         )}
+        {/* Mobile: View All button */}
+        <div className="sm:hidden p-4 border-t">
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="/admin/appointments">
+              View All Appointments
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

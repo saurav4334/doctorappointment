@@ -152,100 +152,154 @@ export default function UserManagement() {
 
   return (
     <AdminLayout allowedRoles={["super_admin"]}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold">User Management</h1>
-            <p className="text-muted-foreground">Manage users and their roles</p>
+            <h1 className="text-2xl md:text-3xl font-display font-bold">User Management</h1>
+            <p className="text-muted-foreground text-sm md:text-base">Manage users and their roles</p>
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+        <Card className="rounded-2xl">
+          <CardHeader className="py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle>All Users</CardTitle>
+                <CardTitle className="text-lg">All Users</CardTitle>
                 <CardDescription>{users.length} users registered</CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 w-64"
-                  />
-                </div>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin" />
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Roles</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.full_name || "No name"}
-                      </TableCell>
-                      <TableCell>{user.phone || "—"}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {user.roles.map((role) => (
-                            <Badge
-                              key={role.role_key}
-                              variant={getRoleBadgeVariant(role.role_key)}
-                              className={!role.is_active ? "opacity-50" : ""}
-                              onClick={() =>
-                                handleToggleRole(user.id, role.role_key, role.is_active)
-                              }
-                              style={{ cursor: "pointer" }}
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Roles</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.full_name || "No name"}
+                          </TableCell>
+                          <TableCell>{user.phone || "—"}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {user.roles.map((role) => (
+                                <Badge
+                                  key={role.role_key}
+                                  variant={getRoleBadgeVariant(role.role_key)}
+                                  className={!role.is_active ? "opacity-50" : "cursor-pointer"}
+                                  onClick={() =>
+                                    handleToggleRole(user.id, role.role_key, role.is_active)
+                                  }
+                                >
+                                  {AVAILABLE_ROLES.find((r) => r.key === role.role_key)?.label ||
+                                    role.role_key}
+                                </Badge>
+                              ))}
+                              {user.roles.length === 0 && (
+                                <span className="text-muted-foreground text-sm">No roles</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {user.created_at
+                              ? new Date(user.created_at).toLocaleDateString()
+                              : "—"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setRoleDialogOpen(true);
+                              }}
                             >
-                              {AVAILABLE_ROLES.find((r) => r.key === role.role_key)?.label ||
-                                role.role_key}
-                            </Badge>
-                          ))}
-                          {user.roles.length === 0 && (
-                            <span className="text-muted-foreground text-sm">No roles</span>
-                          )}
+                              <Shield className="h-4 w-4 mr-1" />
+                              Manage Roles
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y">
+                  {filteredUsers.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <p className="font-medium">No users found</p>
+                    </div>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <div key={user.id} className="p-4 hover:bg-muted/30 transition-colors">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold truncate">
+                              {user.full_name || "No name"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {user.phone || "No phone"}
+                            </p>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {user.roles.map((role) => (
+                                <Badge
+                                  key={role.role_key}
+                                  variant={getRoleBadgeVariant(role.role_key)}
+                                  className={`text-xs ${!role.is_active ? "opacity-50" : ""}`}
+                                >
+                                  {AVAILABLE_ROLES.find((r) => r.key === role.role_key)?.label ||
+                                    role.role_key}
+                                </Badge>
+                              ))}
+                              {user.roles.length === 0 && (
+                                <span className="text-muted-foreground text-xs">No roles</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Joined {user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setRoleDialogOpen(true);
+                            }}
+                          >
+                            <Shield className="h-4 w-4" />
+                          </Button>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        {user.created_at
-                          ? new Date(user.created_at).toLocaleDateString()
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setRoleDialogOpen(true);
-                          }}
-                        >
-                          <Shield className="h-4 w-4 mr-1" />
-                          Manage Roles
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
