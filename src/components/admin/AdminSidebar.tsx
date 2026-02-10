@@ -16,6 +16,7 @@ import {
   FileText,
   Image,
   MessageSquareQuote,
+  Link2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { NavLink } from "@/components/NavLink";
@@ -48,7 +49,9 @@ const superAdminItems = [
   { title: "Doctors", url: "/admin/doctors", icon: Stethoscope },
   { title: "Hospitals", url: "/admin/hospitals", icon: Building2 },
   { title: "Appointments", url: "/admin/appointments", icon: Calendar },
+  { title: "Schedules", url: "/admin/schedule", icon: ClipboardList },
   { title: "Departments", url: "/admin/departments", icon: FolderKanban },
+  { title: "Doctor Assignments", url: "/admin/doctor-assignments", icon: Link2 },
   { title: "SMS Settings", url: "/admin/sms-settings", icon: MessageSquare },
   { title: "Hero Slides", url: "/admin/cms/hero-slides", icon: Image },
   { title: "Testimonials", url: "/admin/cms/testimonials", icon: MessageSquareQuote },
@@ -60,6 +63,7 @@ const hospitalAdminItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Doctors", url: "/admin/doctors", icon: Stethoscope },
   { title: "Appointments", url: "/admin/appointments", icon: Calendar },
+  { title: "Schedules", url: "/admin/schedule", icon: ClipboardList },
   { title: "Settings", url: "/admin/hospital-settings", icon: Settings },
 ];
 
