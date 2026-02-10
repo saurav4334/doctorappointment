@@ -199,7 +199,7 @@ export function CreateAppointmentDialog({
         .filter(Boolean) || []
     );
 
-    const slots: { time: string; label: string; available: boolean }[] = [];
+    const slots: { time: string; label: string; available: boolean; remaining: number; max: number }[] = [];
 
     for (const schedule of daySchedules) {
       const slotDuration = schedule.slot_duration_minutes || 30;
@@ -215,22 +215,21 @@ export function CreateAppointmentDialog({
         const timeStr = `${h.toString().padStart(2, "0")}:${min
           .toString().padStart(2, "0")}`;
 
-        // Count how many bookings already exist at this time
         const bookingsAtTime =
           existingAppointments?.filter(
             (a) => a.appointment_time?.slice(0, 5) === timeStr
           ).length || 0;
 
-        const available = bookingsAtTime < maxPerSlot;
+        const remaining = maxPerSlot - bookingsAtTime;
+        const available = remaining > 0;
 
-        // Format display time
         const period = h >= 12 ? "PM" : "AM";
         const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
         const label = `${displayH}:${min
           .toString()
           .padStart(2, "0")} ${period}`;
 
-        slots.push({ time: timeStr, label, available });
+        slots.push({ time: timeStr, label, available, remaining, max: maxPerSlot });
       }
     }
 
@@ -426,7 +425,7 @@ export function CreateAppointmentDialog({
                   No slots available for this date.
                 </p>
               ) : (
-                <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
+                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
                   {availableSlots.map((slot) => (
                     <Button
                       key={slot.time}
@@ -437,9 +436,12 @@ export function CreateAppointmentDialog({
                       size="sm"
                       disabled={!slot.available}
                       onClick={() => setSelectedSlot(slot.time)}
-                      className="text-xs"
+                      className="text-xs flex flex-col h-auto py-1.5 gap-0"
                     >
-                      {slot.label}
+                      <span>{slot.label}</span>
+                      <span className={`text-[10px] ${selectedSlot === slot.time ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                        {slot.available ? `${slot.remaining}/${slot.max} left` : "Full"}
+                      </span>
                     </Button>
                   ))}
                 </div>
