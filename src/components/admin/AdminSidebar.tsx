@@ -12,6 +12,10 @@ import {
   ClipboardList,
   FolderKanban,
   X,
+  Globe,
+  FileText,
+  Image,
+  MessageSquareQuote,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { NavLink } from "@/components/NavLink";
@@ -46,6 +50,10 @@ const superAdminItems = [
   { title: "Appointments", url: "/admin/appointments", icon: Calendar },
   { title: "Departments", url: "/admin/departments", icon: FolderKanban },
   { title: "SMS Settings", url: "/admin/sms-settings", icon: MessageSquare },
+  { title: "Hero Slides", url: "/admin/cms/hero-slides", icon: Image },
+  { title: "Testimonials", url: "/admin/cms/testimonials", icon: MessageSquareQuote },
+  { title: "Pages & Blog", url: "/admin/cms/pages", icon: FileText },
+  { title: "Site Settings", url: "/admin/cms/site-settings", icon: Globe },
 ];
 
 const hospitalAdminItems = [
