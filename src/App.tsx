@@ -24,6 +24,7 @@ import CMSSiteSettings from "./pages/admin/CMSSiteSettings";
 import CMSHeroSlides from "./pages/admin/CMSHeroSlides";
 import CMSTestimonials from "./pages/admin/CMSTestimonials";
 import CMSPages from "./pages/admin/CMSPages";
+import DoctorHospitalAssignment from "./pages/admin/DoctorHospitalAssignment";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/admin/schedule" element={<ScheduleManagement />} />
           <Route path="/admin/sms-settings" element={<SMSSettings />} />
           <Route path="/admin/departments" element={<DepartmentManagement />} />
+          <Route path="/admin/doctor-assignments" element={<DoctorHospitalAssignment />} />
           <Route path="/admin/hospital-settings" element={<HospitalSettings />} />
           <Route path="/admin/profile" element={<DoctorProfileSettings />} />
           
