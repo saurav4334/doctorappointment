@@ -60,6 +60,9 @@ export default function AppointmentManagement() {
   const [editStatus, setEditStatus] = useState<AppointmentStatus>("scheduled");
   const [editNotes, setEditNotes] = useState("");
   const [cancellationReason, setCancellationReason] = useState("");
+  const [editPaymentStatus, setEditPaymentStatus] = useState("");
+  const [editTransactionId, setEditTransactionId] = useState("");
+  const [editPaymentMethod, setEditPaymentMethod] = useState("");
 
   const { data: appointments, isLoading } = useQuery({
     queryKey: ["admin-appointments", role, hospitalId, doctorId, statusFilter, dateFilter],
@@ -103,11 +106,17 @@ export default function AppointmentManagement() {
       status,
       notes,
       cancellation_reason,
+      payment_status,
+      transaction_id,
+      payment_method,
     }: {
       id: string;
       status: AppointmentStatus;
       notes?: string;
       cancellation_reason?: string;
+      payment_status?: string;
+      transaction_id?: string;
+      payment_method?: string;
     }) => {
       const { error } = await supabase
         .from("appointments")
@@ -115,6 +124,9 @@ export default function AppointmentManagement() {
           status,
           notes,
           cancellation_reason: status === "cancelled" ? cancellation_reason : null,
+          payment_status,
+          transaction_id,
+          payment_method,
         })
         .eq("id", id);
 
@@ -156,6 +168,9 @@ export default function AppointmentManagement() {
     setEditStatus(appointment.status || "scheduled");
     setEditNotes(appointment.notes || "");
     setCancellationReason(appointment.cancellation_reason || "");
+    setEditPaymentStatus(appointment.payment_status || "pending");
+    setEditTransactionId(appointment.transaction_id || "");
+    setEditPaymentMethod(appointment.payment_method || "");
     setIsEditDialogOpen(true);
   };
 
@@ -166,6 +181,9 @@ export default function AppointmentManagement() {
       status: editStatus,
       notes: editNotes,
       cancellation_reason: cancellationReason,
+      payment_status: editPaymentStatus,
+      transaction_id: editTransactionId,
+      payment_method: editPaymentMethod,
     });
   };
 
@@ -506,6 +524,36 @@ export default function AppointmentManagement() {
                   />
                 </div>
               )}
+              <div className="space-y-2">
+                <Label>Payment Status</Label>
+                <Select value={editPaymentStatus} onValueChange={setEditPaymentStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <Input
+                  value={editPaymentMethod}
+                  onChange={(e) => setEditPaymentMethod(e.target.value)}
+                  placeholder="e.g. bKash, Cash, Card..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Transaction ID</Label>
+                <Input
+                  value={editTransactionId}
+                  onChange={(e) => setEditTransactionId(e.target.value)}
+                  placeholder="Enter transaction ID..."
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Notes</Label>
                 <Textarea
