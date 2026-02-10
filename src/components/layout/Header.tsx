@@ -20,11 +20,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 
-const services = [
-  { name: "Our Doctors", href: "/doctors", description: "Find and book appointments with experienced doctors" },
-  { name: "Departments", href: "/departments", description: "Explore our medical departments" },
-  { name: "Health Packages", href: "/packages", description: "Affordable health check packages" },
-];
+interface MenuItemData {
+  id: string;
+  label: string;
+  url: string;
+  sort_order: number;
+  parent_id: string | null;
+  is_active: boolean;
+  open_in_new_tab: boolean;
+}
 
 const adminMenuItems = [
   { name: "SMS Settings", href: "/admin/sms-settings", icon: MessageSquare, description: "Manage SMS providers" },
@@ -34,10 +38,23 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItemData[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      const { data } = await supabase
+        .from("menu_items")
+        .select("id, label, url, sort_order, parent_id, is_active, open_in_new_tab")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      setMenuItems(data || []);
+    };
+    fetchMenu();
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,6 +89,37 @@ export function Header() {
     navigate("/");
   };
 
+  const topLevelItems = menuItems.filter((i) => !i.parent_id);
+  const getChildren = (parentId: string) => menuItems.filter((i) => i.parent_id === parentId);
+
+  const renderLink = (item: MenuItemData) => {
+    const isExternal = item.url.startsWith("http");
+    const linkProps = item.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {};
+
+    if (isExternal) {
+      return (
+        <a
+          href={item.url}
+          className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary text-foreground`}
+          {...linkProps}
+        >
+          {item.label}
+        </a>
+      );
+    }
+    return (
+      <Link
+        to={item.url}
+        className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
+          isActive(item.url) ? "text-primary" : "text-foreground"
+        }`}
+        {...linkProps}
+      >
+        {item.label}
+      </Link>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Top bar */}
@@ -104,72 +152,51 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Dynamic from menu_items */}
         <nav className="hidden items-center gap-1 lg:flex">
-          <Link 
-            to="/" 
-            className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/") ? "text-primary" : "text-foreground"
-            }`}
-          >
-            Home
-          </Link>
-          
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-sm font-medium">
-                  Services
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4">
-                    {services.map((service) => (
-                      <li key={service.name}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={service.href}
-                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                          >
-                            <div className="text-sm font-medium leading-none">{service.name}</div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              {service.description}
-                            </p>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          <Link 
-            to="/doctors" 
-            className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/doctors") ? "text-primary" : "text-foreground"
-            }`}
-          >
-            Our Doctors
-          </Link>
-          
-          <Link 
-            to="/about" 
-            className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/about") ? "text-primary" : "text-foreground"
-            }`}
-          >
-            About
-          </Link>
-          
-          <Link 
-            to="/contact" 
-            className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/contact") ? "text-primary" : "text-foreground"
-            }`}
-          >
-            Contact
-          </Link>
+          {topLevelItems.length > 0 ? (
+            topLevelItems.map((item) => {
+              const children = getChildren(item.id);
+              if (children.length > 0) {
+                return (
+                  <NavigationMenu key={item.id}>
+                    <NavigationMenuList>
+                      <NavigationMenuItem>
+                        <NavigationMenuTrigger className="bg-transparent text-sm font-medium">
+                          {item.label}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <ul className="grid w-[300px] gap-2 p-4">
+                            {children.map((child) => (
+                              <li key={child.id}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    to={child.url}
+                                    className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                  >
+                                    <div className="text-sm font-medium leading-none">{child.label}</div>
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+                    </NavigationMenuList>
+                  </NavigationMenu>
+                );
+              }
+              return <span key={item.id}>{renderLink(item)}</span>;
+            })
+          ) : (
+            // Fallback static nav when no menu items configured
+            <>
+              <Link to="/" className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${isActive("/") ? "text-primary" : "text-foreground"}`}>Home</Link>
+              <Link to="/doctors" className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${isActive("/doctors") ? "text-primary" : "text-foreground"}`}>Our Doctors</Link>
+              <Link to="/about" className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${isActive("/about") ? "text-primary" : "text-foreground"}`}>About</Link>
+              <Link to="/contact" className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${isActive("/contact") ? "text-primary" : "text-foreground"}`}>Contact</Link>
+            </>
+          )}
         </nav>
 
         {/* CTA Buttons */}
@@ -242,42 +269,42 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="border-t bg-background px-4 py-4 lg:hidden">
           <nav className="flex flex-col gap-2">
-            <Link 
-              to="/" 
-              className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/doctors" 
-              className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Our Doctors
-            </Link>
-            <Link 
-              to="/departments" 
-              className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Departments
-            </Link>
-            <Link 
-              to="/about" 
-              className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link 
-              to="/contact" 
-              className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            
+            {topLevelItems.length > 0 ? (
+              <>
+                {topLevelItems.map((item) => {
+                  const children = getChildren(item.id);
+                  return (
+                    <div key={item.id}>
+                      <Link
+                        to={item.url}
+                        className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent block"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                      {children.map((child) => (
+                        <Link
+                          key={child.id}
+                          to={child.url}
+                          className="rounded-md px-8 py-2 text-sm text-muted-foreground hover:bg-accent block"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })}
+              </>
+            ) : (
+              <>
+                <Link to="/" className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+                <Link to="/doctors" className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Our Doctors</Link>
+                <Link to="/about" className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>About</Link>
+                <Link to="/contact" className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+              </>
+            )}
+
             {/* Admin links for mobile */}
             {isSuperAdmin && (
               <div className="mt-4 border-t pt-4">

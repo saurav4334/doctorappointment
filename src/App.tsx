@@ -24,7 +24,11 @@ import CMSSiteSettings from "./pages/admin/CMSSiteSettings";
 import CMSHeroSlides from "./pages/admin/CMSHeroSlides";
 import CMSTestimonials from "./pages/admin/CMSTestimonials";
 import CMSPages from "./pages/admin/CMSPages";
+import MenuManagement from "./pages/admin/MenuManagement";
 import DoctorHospitalAssignment from "./pages/admin/DoctorHospitalAssignment";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import CMSPage from "./pages/CMSPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +62,12 @@ const App = () => (
           <Route path="/admin/cms/hero-slides" element={<CMSHeroSlides />} />
           <Route path="/admin/cms/testimonials" element={<CMSTestimonials />} />
           <Route path="/admin/cms/pages" element={<CMSPages />} />
+          <Route path="/admin/cms/menu" element={<MenuManagement />} />
+          
+          {/* Public Pages */}
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/page/:slug" element={<CMSPage />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
