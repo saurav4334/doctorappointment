@@ -1,60 +1,60 @@
 import { Button } from "@/components/ui/button";
-import { Star, ChevronRight } from "lucide-react";
+import { Star, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Mock featured doctors data
-const featuredDoctors = [
-  {
-    id: "1",
-    name: "Dr. Sarah Ahmed",
-    title: "MBBS, MD (Cardiology)",
-    specialty: "Cardiologist",
-    hospital: "City General Hospital",
-    experience: 15,
-    rating: 4.9,
-    reviews: 127,
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
-    fee: 1500,
-  },
-  {
-    id: "2",
-    name: "Dr. Mohammad Rahman",
-    title: "MBBS, FCPS (Medicine)",
-    specialty: "Internal Medicine",
-    hospital: "Central Medical Center",
-    experience: 20,
-    rating: 4.8,
-    reviews: 234,
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
-    fee: 1200,
-  },
-  {
-    id: "3",
-    name: "Dr. Fatima Khan",
-    title: "MBBS, DCH (Pediatrics)",
-    specialty: "Pediatrician",
-    hospital: "Children's Hospital",
-    experience: 12,
-    rating: 4.9,
-    reviews: 189,
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
-    fee: 1000,
-  },
-  {
-    id: "4",
-    name: "Dr. Karim Hassan",
-    title: "MBBS, MS (Orthopedics)",
-    specialty: "Orthopedic Surgeon",
-    hospital: "Bone & Joint Center",
-    experience: 18,
-    rating: 4.7,
-    reviews: 156,
-    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80",
-    fee: 1800,
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function FeaturedDoctors() {
+  const { data: featuredDoctors = [], isLoading } = useQuery({
+    queryKey: ["featured-doctors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctors")
+        .select(`
+          id, full_name, title, specializations, experience_years, rating, total_reviews,
+          photo_url, consultation_fee, slug,
+          doctor_hospitals (
+            is_primary,
+            hospitals (name)
+          )
+        `)
+        .eq("is_active", true)
+        .eq("is_featured", true)
+        .order("rating", { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+      return (data || []).map((doc) => {
+        const primary = doc.doctor_hospitals?.find((dh: any) => dh.is_primary) || doc.doctor_hospitals?.[0];
+        return {
+          id: doc.id,
+          slug: doc.slug || doc.id,
+          name: doc.full_name,
+          title: doc.title || doc.specializations?.join(", ") || "",
+          specialty: doc.specializations?.[0] || "General",
+          hospital: primary?.hospitals?.name || "",
+          experience: doc.experience_years || 0,
+          rating: doc.rating || 0,
+          reviews: doc.total_reviews || 0,
+          image: doc.photo_url || "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
+          fee: doc.consultation_fee || 500,
+        };
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
+
+  if (featuredDoctors.length === 0) return null;
+
   return (
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -81,7 +81,7 @@ export function FeaturedDoctors() {
           {featuredDoctors.map((doctor) => (
             <Link
               key={doctor.id}
-              to={`/doctors/${doctor.id}`}
+              to={`/doctors/${doctor.slug}`}
               className="group overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               {/* Image */}
@@ -91,11 +91,13 @@ export function FeaturedDoctors() {
                   alt={doctor.name}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-background/90 px-2 py-1 text-xs font-medium backdrop-blur-sm">
-                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                  <span>{doctor.rating}</span>
-                  <span className="text-muted-foreground">({doctor.reviews})</span>
-                </div>
+                {doctor.rating > 0 && (
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-background/90 px-2 py-1 text-xs font-medium backdrop-blur-sm">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span>{doctor.rating}</span>
+                    <span className="text-muted-foreground">({doctor.reviews})</span>
+                  </div>
+                )}
               </div>
 
               {/* Content */}
@@ -105,7 +107,9 @@ export function FeaturedDoctors() {
                   {doctor.name}
                 </h3>
                 <p className="mt-0.5 text-sm text-muted-foreground">{doctor.title}</p>
-                <p className="mt-2 text-sm text-muted-foreground">{doctor.hospital}</p>
+                {doctor.hospital && (
+                  <p className="mt-2 text-sm text-muted-foreground">{doctor.hospital}</p>
+                )}
                 
                 <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
                   <div>

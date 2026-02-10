@@ -9,129 +9,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Star, MapPin, Clock, Filter } from "lucide-react";
+import { Search, Star, MapPin, Clock, Filter, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Mock doctors data
-const doctors = [
-  {
-    id: "1",
-    name: "Dr. Sarah Ahmed",
-    title: "MBBS, MD (Cardiology)",
-    specialty: "Cardiologist",
-    department: "Cardiology",
-    hospital: "City General Hospital",
-    location: "Gulshan, Dhaka",
-    experience: 15,
-    rating: 4.9,
-    reviews: 127,
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
-    fee: 1500,
-    availableToday: true,
-  },
-  {
-    id: "2",
-    name: "Dr. Mohammad Rahman",
-    title: "MBBS, FCPS (Medicine)",
-    specialty: "Internal Medicine",
-    department: "Medicine",
-    hospital: "Central Medical Center",
-    location: "Banani, Dhaka",
-    experience: 20,
-    rating: 4.8,
-    reviews: 234,
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
-    fee: 1200,
-    availableToday: false,
-  },
-  {
-    id: "3",
-    name: "Dr. Fatima Khan",
-    title: "MBBS, DCH (Pediatrics)",
-    specialty: "Pediatrician",
-    department: "Pediatrics",
-    hospital: "Children's Hospital",
-    location: "Dhanmondi, Dhaka",
-    experience: 12,
-    rating: 4.9,
-    reviews: 189,
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
-    fee: 1000,
-    availableToday: true,
-  },
-  {
-    id: "4",
-    name: "Dr. Karim Hassan",
-    title: "MBBS, MS (Orthopedics)",
-    specialty: "Orthopedic Surgeon",
-    department: "Orthopedics",
-    hospital: "Bone & Joint Center",
-    location: "Uttara, Dhaka",
-    experience: 18,
-    rating: 4.7,
-    reviews: 156,
-    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80",
-    fee: 1800,
-    availableToday: true,
-  },
-  {
-    id: "5",
-    name: "Dr. Nusrat Jahan",
-    title: "MBBS, FCPS (Gynae)",
-    specialty: "Gynecologist",
-    department: "Gynecology",
-    hospital: "Women's Health Center",
-    location: "Gulshan, Dhaka",
-    experience: 14,
-    rating: 4.9,
-    reviews: 203,
-    image: "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=400&q=80",
-    fee: 1400,
-    availableToday: false,
-  },
-  {
-    id: "6",
-    name: "Dr. Tanvir Hossain",
-    title: "MBBS, MS (Neurology)",
-    specialty: "Neurologist",
-    department: "Neurology",
-    hospital: "Brain & Spine Center",
-    location: "Mohakhali, Dhaka",
-    experience: 16,
-    rating: 4.8,
-    reviews: 178,
-    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80",
-    fee: 2000,
-    availableToday: true,
-  },
-];
-
-const departments = [
-  "All Departments",
-  "Cardiology",
-  "Medicine",
-  "Pediatrics",
-  "Orthopedics",
-  "Gynecology",
-  "Neurology",
-  "Dermatology",
-  "ENT",
-  "Ophthalmology",
-];
-
-const locations = [
-  "All Locations",
-  "Gulshan, Dhaka",
-  "Banani, Dhaka",
-  "Dhanmondi, Dhaka",
-  "Uttara, Dhaka",
-  "Mohakhali, Dhaka",
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DoctorsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
+
+  // Fetch doctors from database
+  const { data: doctors = [], isLoading } = useQuery({
+    queryKey: ["doctors-listing"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctors")
+        .select(`
+          id, full_name, title, specializations, experience_years, rating, total_reviews,
+          photo_url, consultation_fee, slug, is_featured,
+          doctor_hospitals (
+            hospital_id, is_primary,
+            hospitals (name, city),
+            departments:departments (name)
+          )
+        `)
+        .eq("is_active", true)
+        .order("rating", { ascending: false });
+
+      if (error) throw error;
+      return (data || []).map((doc) => {
+        const primary = doc.doctor_hospitals?.find((dh: any) => dh.is_primary) || doc.doctor_hospitals?.[0];
+        return {
+          id: doc.id,
+          slug: doc.slug || doc.id,
+          name: doc.full_name,
+          title: doc.title || doc.specializations?.join(", ") || "",
+          specialty: doc.specializations?.[0] || "General",
+          department: primary?.departments?.name || "General",
+          hospital: primary?.hospitals?.name || "",
+          location: primary?.hospitals?.city || "",
+          experience: doc.experience_years || 0,
+          rating: doc.rating || 0,
+          reviews: doc.total_reviews || 0,
+          image: doc.photo_url || "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
+          fee: doc.consultation_fee || 500,
+        };
+      });
+    },
+  });
+
+  // Fetch departments
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("departments").select("name").eq("is_active", true).order("name");
+      return ["All Departments", ...(data?.map((d) => d.name) || [])];
+    },
+  });
+
+  // Derive unique locations
+  const locations = ["All Locations", ...Array.from(new Set(doctors.map((d) => d.location).filter(Boolean)))];
 
   const filteredDoctors = doctors.filter((doctor) => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -153,7 +91,7 @@ export default function DoctorsPage() {
               Find & Book Your Doctor
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Search from our network of 200+ experienced doctors across 50+ hospitals
+              Search from our network of experienced doctors across multiple hospitals
             </p>
           </div>
 
@@ -201,106 +139,111 @@ export default function DoctorsPage() {
       {/* Results */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filteredDoctors.length}</span> doctors
-            </p>
-            <Select defaultValue="rating">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="experience">Most Experienced</SelectItem>
-                <SelectItem value="fee-low">Fee: Low to High</SelectItem>
-                <SelectItem value="fee-high">Fee: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Doctor Cards */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDoctors.map((doctor) => (
-              <div
-                key={doctor.id}
-                className="overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-lg"
-              >
-                <div className="flex gap-4 p-4">
-                  {/* Image */}
-                  <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg">
-                    <img
-                      src={doctor.image}
-                      alt={doctor.name}
-                      className="h-full w-full object-cover"
-                    />
-                    {doctor.availableToday && (
-                      <div className="absolute bottom-1 left-1 rounded bg-green-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                        Available Today
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <span className="text-xs font-medium text-primary">{doctor.specialty}</span>
-                        <h3 className="font-display text-lg font-semibold text-foreground">
-                          {doctor.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">{doctor.title}</p>
-                      </div>
-                      <div className="flex items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-sm">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                        <span className="font-medium text-amber-700">{doctor.rating}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5" />
-                        {doctor.location}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{doctor.hospital}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-3">
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      {doctor.experience} yrs exp
-                    </span>
-                    <span className="font-semibold text-primary">৳{doctor.fee}</span>
-                  </div>
-                  <Link to={`/doctors/${doctor.id}`}>
-                    <Button variant="hero" size="sm">
-                      Book Now
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredDoctors.length === 0 && (
-            <div className="py-16 text-center">
-              <p className="text-lg text-muted-foreground">
-                No doctors found matching your criteria.
-              </p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedDepartment("All Departments");
-                  setSelectedLocation("All Locations");
-                }}
-              >
-                Clear Filters
-              </Button>
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+          ) : (
+            <>
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-muted-foreground">
+                  Showing <span className="font-semibold text-foreground">{filteredDoctors.length}</span> doctors
+                </p>
+                <Select defaultValue="rating">
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="experience">Most Experienced</SelectItem>
+                    <SelectItem value="fee-low">Fee: Low to High</SelectItem>
+                    <SelectItem value="fee-high">Fee: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Doctor Cards */}
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredDoctors.map((doctor) => (
+                  <div
+                    key={doctor.id}
+                    className="overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-lg"
+                  >
+                    <div className="flex gap-4 p-4">
+                      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg">
+                        <img
+                          src={doctor.image}
+                          alt={doctor.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className="text-xs font-medium text-primary">{doctor.specialty}</span>
+                            <h3 className="font-display text-lg font-semibold text-foreground">
+                              {doctor.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">{doctor.title}</p>
+                          </div>
+                          {doctor.rating > 0 && (
+                            <div className="flex items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-sm">
+                              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                              <span className="font-medium text-amber-700">{doctor.rating}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+                          {doctor.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5" />
+                              {doctor.location}
+                            </span>
+                          )}
+                        </div>
+                        {doctor.hospital && (
+                          <p className="mt-1 text-sm text-muted-foreground">{doctor.hospital}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-3">
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          {doctor.experience} yrs exp
+                        </span>
+                        <span className="font-semibold text-primary">৳{doctor.fee}</span>
+                      </div>
+                      <Link to={`/doctors/${doctor.slug}`}>
+                        <Button variant="hero" size="sm">
+                          Book Now
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredDoctors.length === 0 && (
+                <div className="py-16 text-center">
+                  <p className="text-lg text-muted-foreground">
+                    No doctors found matching your criteria.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedDepartment("All Departments");
+                      setSelectedLocation("All Locations");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
