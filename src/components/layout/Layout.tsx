@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import { FloatingChatWidget } from "@/components/FloatingChatWidget";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,6 +13,7 @@ export function Layout({ children }: LayoutProps) {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <FloatingChatWidget />
     </div>
   );
 }

@@ -84,6 +84,8 @@ export default function CMSSiteSettings() {
     { key: "contact", label: "Contact" },
     { key: "social", label: "Social Links" },
     { key: "seo", label: "SEO" },
+    { key: "chat", label: "Chat Widget" },
+    { key: "email", label: "Email / SMTP" },
   ];
 
   return (
@@ -101,9 +103,9 @@ export default function CMSSiteSettings() {
         </div>
 
         <Tabs defaultValue="general">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="flex flex-wrap h-auto gap-1">
             {categories.map((c) => (
-              <TabsTrigger key={c.key} value={c.key}>{c.label}</TabsTrigger>
+              <TabsTrigger key={c.key} value={c.key} className="flex-shrink-0">{c.label}</TabsTrigger>
             ))}
           </TabsList>
 
@@ -128,6 +130,7 @@ export default function CMSSiteSettings() {
                         <div className="space-y-2">
                           <Label>{s.label || s.setting_key}</Label>
                           <Input
+                            type={s.setting_key === "smtp_pass" ? "password" : "text"}
                             value={s.setting_value || ""}
                             onChange={(e) => updateValue(s.setting_key, e.target.value)}
                             placeholder={`Enter ${s.label?.toLowerCase() || s.setting_key}`}
