@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 
 interface SettingRow {
   id: string;
@@ -115,13 +116,24 @@ export default function CMSSiteSettings() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {getByCategory(cat.key).map((s) => (
-                    <div key={s.id} className="space-y-2">
-                      <Label>{s.label || s.setting_key}</Label>
-                      <Input
-                        value={s.setting_value || ""}
-                        onChange={(e) => updateValue(s.setting_key, e.target.value)}
-                        placeholder={`Enter ${s.label?.toLowerCase() || s.setting_key}`}
-                      />
+                    <div key={s.id}>
+                      {s.setting_type === "image" ? (
+                        <ImageUpload
+                          value={s.setting_value || null}
+                          onChange={(url) => updateValue(s.setting_key, url || "")}
+                          label={s.label || s.setting_key}
+                          folder="site"
+                        />
+                      ) : (
+                        <div className="space-y-2">
+                          <Label>{s.label || s.setting_key}</Label>
+                          <Input
+                            value={s.setting_value || ""}
+                            onChange={(e) => updateValue(s.setting_key, e.target.value)}
+                            placeholder={`Enter ${s.label?.toLowerCase() || s.setting_key}`}
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
                   {getByCategory(cat.key).length === 0 && (
