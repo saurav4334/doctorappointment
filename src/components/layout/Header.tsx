@@ -1,15 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone, ChevronDown, Settings, MessageSquare, LogOut, User } from "lucide-react";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +28,7 @@ const adminMenuItems = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileExpandedIds, setMobileExpandedIds] = useState<string[]>([]);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [menuItems, setMenuItems] = useState<MenuItemData[]>([]);
@@ -154,36 +147,55 @@ export function Header() {
 
         {/* Desktop Navigation - Dynamic from menu_items */}
         <nav className="hidden items-center gap-1 lg:flex">
-          {topLevelItems.length > 0 ? (
+        {topLevelItems.length > 0 ? (
             topLevelItems.map((item) => {
               const children = getChildren(item.id);
               if (children.length > 0) {
                 return (
-                  <NavigationMenu key={item.id}>
-                    <NavigationMenuList>
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger className="bg-transparent text-sm font-medium">
-                          {item.label}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                          <ul className="grid w-[300px] gap-2 p-4">
-                            {children.map((child) => (
-                              <li key={child.id}>
-                                <NavigationMenuLink asChild>
-                                  <Link
-                                    to={child.url}
-                                    className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                                  >
-                                    <div className="text-sm font-medium leading-none">{child.label}</div>
-                                  </Link>
-                                </NavigationMenuLink>
-                              </li>
-                            ))}
-                          </ul>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-                    </NavigationMenuList>
-                  </NavigationMenu>
+                  <DropdownMenu key={item.id}>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className={`inline-flex items-center gap-1 px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
+                          children.some((c) => isActive(c.url)) ? "text-primary" : "text-foreground"
+                        }`}
+                      >
+                        {item.label}
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="z-50 min-w-[200px] bg-popover border border-border shadow-lg"
+                    >
+                      {children.map((child) => {
+                        const isExternal = child.url.startsWith("http");
+                        const linkProps = child.open_in_new_tab
+                          ? { target: "_blank" as const, rel: "noopener noreferrer" }
+                          : {};
+                        return (
+                          <DropdownMenuItem key={child.id} asChild>
+                            {isExternal ? (
+                              <a
+                                href={child.url}
+                                className="cursor-pointer"
+                                {...linkProps}
+                              >
+                                {child.label}
+                              </a>
+                            ) : (
+                              <Link
+                                to={child.url}
+                                className={`cursor-pointer ${isActive(child.url) ? "text-primary font-medium" : ""}`}
+                                {...linkProps}
+                              >
+                                {child.label}
+                              </Link>
+                            )}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 );
               }
               return <span key={item.id}>{renderLink(item)}</span>;
@@ -273,26 +285,51 @@ export function Header() {
               <>
                 {topLevelItems.map((item) => {
                   const children = getChildren(item.id);
-                  return (
-                    <div key={item.id}>
-                      <Link
-                        to={item.url}
-                        className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent block"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                      {children.map((child) => (
-                        <Link
-                          key={child.id}
-                          to={child.url}
-                          className="rounded-md px-8 py-2 text-sm text-muted-foreground hover:bg-accent block"
-                          onClick={() => setMobileMenuOpen(false)}
+                  const isExpanded = mobileExpandedIds.includes(item.id);
+                  if (children.length > 0) {
+                    return (
+                      <div key={item.id}>
+                        <button
+                          className="flex w-full items-center justify-between rounded-md px-4 py-3 text-sm font-medium hover:bg-accent"
+                          onClick={() =>
+                            setMobileExpandedIds((prev) =>
+                              prev.includes(item.id)
+                                ? prev.filter((id) => id !== item.id)
+                                : [...prev, item.id]
+                            )
+                          }
                         >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
+                          {item.label}
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                          />
+                        </button>
+                        {isExpanded && (
+                          <div className="ml-4 border-l border-border pl-2">
+                            {children.map((child) => (
+                              <Link
+                                key={child.id}
+                                to={child.url}
+                                className="rounded-md px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground block"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                {child.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item.id}
+                      to={item.url}
+                      className="rounded-md px-4 py-3 text-sm font-medium hover:bg-accent block"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
                   );
                 })}
               </>
