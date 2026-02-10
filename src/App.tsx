@@ -29,6 +29,8 @@ import DoctorHospitalAssignment from "./pages/admin/DoctorHospitalAssignment";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import CMSPage from "./pages/CMSPage";
+import Departments from "./pages/Departments";
+import DepartmentDoctors from "./pages/DepartmentDoctors";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,8 @@ const App = () => (
           <Route path="/admin/cms/menu" element={<MenuManagement />} />
           
           {/* Public Pages */}
+          <Route path="/departments" element={<Departments />} />
+          <Route path="/departments/:slug" element={<DepartmentDoctors />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/page/:slug" element={<CMSPage />} />
