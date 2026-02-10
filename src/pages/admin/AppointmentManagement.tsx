@@ -32,9 +32,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Search, Eye, Edit, X } from "lucide-react";
+import { Calendar, Search, Eye, Edit, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { CreateAppointmentDialog } from "@/components/admin/appointments/CreateAppointmentDialog";
 
 type AppointmentStatus = "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show";
 
@@ -63,6 +64,7 @@ export default function AppointmentManagement() {
   const [editPaymentStatus, setEditPaymentStatus] = useState("");
   const [editTransactionId, setEditTransactionId] = useState("");
   const [editPaymentMethod, setEditPaymentMethod] = useState("");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: appointments, isLoading } = useQuery({
     queryKey: ["admin-appointments", role, hospitalId, doctorId, statusFilter, dateFilter],
@@ -208,6 +210,10 @@ export default function AppointmentManagement() {
               View and manage patient appointments
             </p>
           </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Appointment
+          </Button>
         </div>
 
         {/* Filters Card */}
@@ -576,6 +582,13 @@ export default function AppointmentManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Create Appointment Dialog */}
+        <CreateAppointmentDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin-appointments"] })}
+        />
       </div>
     </AdminLayout>
   );
