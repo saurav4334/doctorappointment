@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Save, UserCog } from "lucide-react";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 import { toast } from "sonner";
 
 interface DoctorData {
@@ -154,16 +155,12 @@ export default function DoctorProfileSettings() {
                   placeholder="Brief introduction about yourself..."
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="photo_url">Photo URL</Label>
-                <Input
-                  id="photo_url"
-                  type="url"
-                  value={formData.photo_url || ""}
-                  onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUpload
+                value={formData.photo_url || null}
+                onChange={(url) => setFormData({ ...formData, photo_url: url || "" })}
+                label="Photo"
+                folder="doctors"
+              />
             </CardContent>
           </Card>
 
