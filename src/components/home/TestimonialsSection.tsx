@@ -1,37 +1,44 @@
 import { Star, Quote } from "lucide-react";
-
-const testimonials = [
-  {
-    id: 1,
-    name: "Rashida Begum",
-    role: "Patient",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
-    rating: 5,
-    content: "The booking process was so easy! I found a great cardiologist within minutes and got an appointment the very next day. The doctor was very attentive and professional.",
-  },
-  {
-    id: 2,
-    name: "Abdul Karim",
-    role: "Patient",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
-    rating: 5,
-    content: "I've been using this platform for my family's healthcare needs for over a year now. The quality of doctors and the ease of booking appointments is unmatched.",
-  },
-  {
-    id: 3,
-    name: "Nasreen Akhter",
-    role: "Patient",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
-    rating: 5,
-    content: "As a working mother, finding time for doctor visits was always challenging. This platform made it so convenient with flexible appointment times and excellent doctors.",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function TestimonialsSection() {
+  const { data: testimonials = [], isLoading } = useQuery({
+    queryKey: ["testimonials-public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("id, patient_name, content, rating, patient_photo_url, is_featured")
+        .eq("is_active", true)
+        .order("is_featured", { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <section className="bg-muted/30 py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <Skeleton className="h-4 w-24 mx-auto" />
+            <Skeleton className="h-10 w-64 mx-auto mt-2" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-48 rounded-xl" />)}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) return null;
+
   return (
     <section className="bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">
             Testimonials
@@ -40,49 +47,49 @@ export function TestimonialsSection() {
             What Our Patients Say
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Don't just take our word for it. Here's what our patients have to say 
-            about their experience with MediCare.
+            Don't just take our word for it. Here's what our patients have to say
+            about their experience.
           </p>
         </div>
 
-        {/* Testimonials Grid */}
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
               className="relative rounded-xl bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md"
             >
-              {/* Quote icon */}
               <div className="absolute -top-3 left-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <Quote className="h-5 w-5" />
                 </div>
               </div>
 
-              {/* Content */}
               <div className="mt-4">
-                {/* Rating */}
                 <div className="flex gap-1">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  {Array.from({ length: testimonial.rating || 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
 
-                {/* Text */}
                 <p className="mt-4 text-muted-foreground">
                   "{testimonial.content}"
                 </p>
 
-                {/* Author */}
                 <div className="mt-6 flex items-center gap-4 border-t border-border pt-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
+                  {testimonial.patient_photo_url ? (
+                    <img
+                      src={testimonial.patient_photo_url}
+                      alt={testimonial.patient_name}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                      {testimonial.patient_name.charAt(0)}
+                    </div>
+                  )}
                   <div>
-                    <h4 className="font-semibold text-foreground">{testimonial.name}</h4>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    <h4 className="font-semibold text-foreground">{testimonial.patient_name}</h4>
+                    <p className="text-sm text-muted-foreground">Patient</p>
                   </div>
                 </div>
               </div>
