@@ -13,6 +13,7 @@ import {
   FolderKanban,
   X,
   Globe,
+  Menu,
   FileText,
   Image,
   MessageSquareQuote,
@@ -56,6 +57,7 @@ const superAdminItems = [
   { title: "Hero Slides", url: "/admin/cms/hero-slides", icon: Image },
   { title: "Testimonials", url: "/admin/cms/testimonials", icon: MessageSquareQuote },
   { title: "Pages & Blog", url: "/admin/cms/pages", icon: FileText },
+  { title: "Menu Management", url: "/admin/cms/menu", icon: Menu },
   { title: "Site Settings", url: "/admin/cms/site-settings", icon: Globe },
 ];
 
