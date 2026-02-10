@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2, Star, MessageSquareQuote } from "lucide-react";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 import { toast } from "sonner";
 import { DataCard, EmptyState } from "@/components/admin/common/DataCard";
 
@@ -133,7 +134,7 @@ export default function CMSTestimonials() {
               <div className="space-y-2"><Label>Content *</Label><Textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={3} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Rating (1-5)</Label><Input type="number" min={1} max={5} value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) || 5 })} /></div>
-                <div className="space-y-2"><Label>Photo URL</Label><Input value={form.patient_photo_url} onChange={(e) => setForm({ ...form, patient_photo_url: e.target.value })} /></div>
+                <ImageUpload value={form.patient_photo_url || null} onChange={(url) => setForm({ ...form, patient_photo_url: url || "" })} label="Patient Photo" folder="testimonials" />
               </div>
               <div className="flex gap-6">
                 <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>

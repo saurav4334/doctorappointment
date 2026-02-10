@@ -35,6 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Search, Plus, Edit, Trash2, Star } from "lucide-react";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 
 interface Doctor {
   id: string;
@@ -487,16 +488,12 @@ export default function DoctorManagement() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Photo URL</Label>
-                    <Input
-                      value={editingDoctor.photo_url || ""}
-                      onChange={(e) =>
-                        setEditingDoctor({ ...editingDoctor, photo_url: e.target.value })
-                      }
-                      placeholder="https://..."
-                    />
-                  </div>
+                  <ImageUpload
+                    value={editingDoctor.photo_url || null}
+                    onChange={(url) => setEditingDoctor({ ...editingDoctor, photo_url: url || "" })}
+                    label="Photo"
+                    folder="doctors"
+                  />
                 </div>
 
                 <div className="space-y-2">

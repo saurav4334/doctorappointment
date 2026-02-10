@@ -34,6 +34,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Search, Plus, Edit, Trash2, Building2, MapPin, Phone, Globe } from "lucide-react";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 
 interface Hospital {
   id: string;
@@ -503,16 +504,12 @@ export default function HospitalManagement() {
                       placeholder="https://..."
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Logo URL</Label>
-                    <Input
-                      value={editingHospital.logo_url || ""}
-                      onChange={(e) =>
-                        setEditingHospital({ ...editingHospital, logo_url: e.target.value })
-                      }
-                      placeholder="https://..."
-                    />
-                  </div>
+                  <ImageUpload
+                    value={editingHospital.logo_url || null}
+                    onChange={(url) => setEditingHospital({ ...editingHospital, logo_url: url || "" })}
+                    label="Logo"
+                    folder="hospitals"
+                  />
                 </div>
 
                 <div className="space-y-2">

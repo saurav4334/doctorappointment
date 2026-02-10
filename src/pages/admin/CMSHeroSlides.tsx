@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, Plus, Pencil, Trash2, Image } from "lucide-react";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 import { toast } from "sonner";
 import { DataCard, EmptyState } from "@/components/admin/common/DataCard";
 
@@ -161,10 +162,12 @@ export default function CMSHeroSlides() {
                 <Label>Subtitle</Label>
                 <Textarea value={form.subtitle || ""} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} rows={2} />
               </div>
-              <div className="space-y-2">
-                <Label>Image URL</Label>
-                <Input value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
-              </div>
+              <ImageUpload
+                value={form.image_url || null}
+                onChange={(url) => setForm({ ...form, image_url: url || "" })}
+                label="Slide Image"
+                folder="hero-slides"
+              />
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>CTA Text</Label>
