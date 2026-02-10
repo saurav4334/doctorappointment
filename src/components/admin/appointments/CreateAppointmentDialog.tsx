@@ -352,7 +352,7 @@ export function CreateAppointmentDialog({
                 <SelectContent>
                   {doctors?.map((d) => (
                     <SelectItem key={d.id} value={d.id}>
-                      {d.title} {d.full_name}
+                      {d.full_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
