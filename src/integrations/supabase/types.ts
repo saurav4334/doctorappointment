@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      ambulance_requests: {
+        Row: {
+          ambulance_type: string
+          created_at: string
+          destination: string | null
+          email: string | null
+          emergency_level: string
+          id: string
+          notes: string | null
+          patient_name: string
+          phone: string
+          pickup_latitude: number | null
+          pickup_location: string
+          pickup_longitude: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ambulance_type?: string
+          created_at?: string
+          destination?: string | null
+          email?: string | null
+          emergency_level?: string
+          id?: string
+          notes?: string | null
+          patient_name: string
+          phone: string
+          pickup_latitude?: number | null
+          pickup_location: string
+          pickup_longitude?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ambulance_type?: string
+          created_at?: string
+          destination?: string | null
+          email?: string | null
+          emergency_level?: string
+          id?: string
+          notes?: string | null
+          patient_name?: string
+          phone?: string
+          pickup_latitude?: number | null
+          pickup_location?: string
+          pickup_longitude?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           appointment_date: string
