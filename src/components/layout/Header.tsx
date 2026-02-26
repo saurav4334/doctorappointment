@@ -152,16 +152,11 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:h-20">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          {siteLogo ? (
-            <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-lg object-contain" />
+        {siteLogo ? (
+            <img src={siteLogo} alt={siteName} className="h-10 rounded-lg object-contain" />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <span className="text-xl font-bold text-primary-foreground">{siteName.charAt(0)}</span>
-            </div>
+            <img src="/logo.png" alt="Doctors AppointmentBD" className="h-10 object-contain" />
           )}
-          <span className="font-display text-xl font-bold text-foreground md:text-2xl">
-            {siteName}
-          </span>
         </Link>
 
         {/* Desktop Navigation - Dynamic from menu_items */}
