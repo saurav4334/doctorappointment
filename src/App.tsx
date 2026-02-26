@@ -27,6 +27,7 @@ import CMSPages from "./pages/admin/CMSPages";
 import MenuManagement from "./pages/admin/MenuManagement";
 import DoctorHospitalAssignment from "./pages/admin/DoctorHospitalAssignment";
 import AmbulanceManagement from "./pages/admin/AmbulanceManagement";
+import HomeServiceManagement from "./pages/admin/HomeServiceManagement";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import CMSPage from "./pages/CMSPage";
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/admin/departments" element={<DepartmentManagement />} />
           <Route path="/admin/doctor-assignments" element={<DoctorHospitalAssignment />} />
           <Route path="/admin/ambulance" element={<AmbulanceManagement />} />
+          <Route path="/admin/home-services" element={<HomeServiceManagement />} />
           <Route path="/admin/hospital-settings" element={<HospitalSettings />} />
           <Route path="/admin/profile" element={<DoctorProfileSettings />} />
           

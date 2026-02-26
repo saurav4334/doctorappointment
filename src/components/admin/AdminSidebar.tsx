@@ -19,6 +19,7 @@ import {
   MessageSquareQuote,
   Link2,
   Ambulance,
+  Home,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { NavLink } from "@/components/NavLink";
@@ -55,6 +56,7 @@ const superAdminItems = [
   { title: "Departments", url: "/admin/departments", icon: FolderKanban },
   { title: "Doctor Assignments", url: "/admin/doctor-assignments", icon: Link2 },
   { title: "Ambulance Requests", url: "/admin/ambulance", icon: Ambulance },
+  { title: "Home Services", url: "/admin/home-services", icon: Home },
   { title: "SMS Settings", url: "/admin/sms-settings", icon: MessageSquare },
   { title: "Hero Slides", url: "/admin/cms/hero-slides", icon: Image },
   { title: "Testimonials", url: "/admin/cms/testimonials", icon: MessageSquareQuote },

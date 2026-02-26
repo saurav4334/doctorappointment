@@ -3,6 +3,7 @@ import HeroSlider from "@/components/home/HeroSlider";
 import ServicesGrid from "@/components/home/ServicesGrid";
 import QuickServicesSection from "@/components/home/QuickServicesSection";
 import FeaturedDoctors from "@/components/home/FeaturedDoctors";
+import HomeServicesSection from "@/components/home/HomeServicesSection";
 import PartnersSection from "@/components/home/PartnersSection";
 import StatsSection from "@/components/home/StatsSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
@@ -15,6 +16,7 @@ const Index = () => {
       <ServicesGrid />
       <QuickServicesSection />
       <FeaturedDoctors />
+      <HomeServicesSection />
       <PartnersSection />
       <StatsSection />
       <TestimonialsSection />
