@@ -33,6 +33,8 @@ import CMSPage from "./pages/CMSPage";
 import Departments from "./pages/Departments";
 import DepartmentDoctors from "./pages/DepartmentDoctors";
 import AmbulanceService from "./pages/AmbulanceService";
+import Hospitals from "./pages/Hospitals";
+import HospitalRegister from "./pages/HospitalRegister";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +78,8 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/page/:slug" element={<CMSPage />} />
           <Route path="/ambulance" element={<AmbulanceService />} />
+          <Route path="/hospitals" element={<Hospitals />} />
+          <Route path="/hospital-register" element={<HospitalRegister />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
