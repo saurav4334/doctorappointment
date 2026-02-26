@@ -107,7 +107,7 @@ export default function HospitalRegister() {
         <main className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
           <Card className="max-w-lg w-full text-center">
             <CardContent className="py-12">
-              <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <CheckCircle2 className="h-16 w-16 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-display font-bold mb-2">Application Submitted!</h2>
               <p className="text-muted-foreground">
                 Thank you for registering your hospital. Our team will review your
