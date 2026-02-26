@@ -4,19 +4,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight } from "lucide-react";
 import {
   Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, FlaskConical, Pill,
+  Heart, Ear, Hand, Syringe, Activity, Microscope, Scan, ShieldPlus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   stethoscope: Stethoscope,
+  "heart-pulse": HeartPulse,
   heartpulse: HeartPulse,
   brain: Brain,
   bone: Bone,
   baby: Baby,
   eye: Eye,
+  "flask-conical": FlaskConical,
   flaskconical: FlaskConical,
   pill: Pill,
+  heart: Heart,
+  ear: Ear,
+  hand: Hand,
+  syringe: Syringe,
+  activity: Activity,
+  microscope: Microscope,
+  scan: Scan,
+  "shield-plus": ShieldPlus,
 };
 
 function getIcon(iconName: string | null): LucideIcon {
