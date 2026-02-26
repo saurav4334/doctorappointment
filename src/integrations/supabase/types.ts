@@ -519,6 +519,95 @@ export type Database = {
           },
         ]
       }
+      home_service_requests: {
+        Row: {
+          address: string
+          created_at: string
+          email: string | null
+          id: string
+          notes: string | null
+          patient_name: string
+          phone: string
+          preferred_date: string | null
+          preferred_time: string | null
+          service_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          notes?: string | null
+          patient_name: string
+          phone: string
+          preferred_date?: string | null
+          preferred_time?: string | null
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          notes?: string | null
+          patient_name?: string
+          phone?: string
+          preferred_date?: string | null
+          preferred_time?: string | null
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_service_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "home_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_services: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hospital_departments: {
         Row: {
           created_at: string | null
