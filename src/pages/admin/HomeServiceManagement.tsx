@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ImageUpload } from "@/components/admin/common/ImageUpload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -281,6 +282,7 @@ function RequestsTab() {
 function ServicesTab() {
   const [editService, setEditService] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: services = [], isLoading } = useQuery({
@@ -335,7 +337,7 @@ function ServicesTab() {
       id: editService?.id || undefined,
       name: form.get("name") as string,
       description: form.get("description") as string || null,
-      image_url: form.get("image_url") as string || null,
+      image_url: imageUrl,
       sort_order: parseInt(form.get("sort_order") as string) || 0,
       is_active: editService?.is_active ?? true,
       updated_at: new Date().toISOString(),
@@ -344,11 +346,13 @@ function ServicesTab() {
 
   const openEdit = (svc: any) => {
     setEditService(svc);
+    setImageUrl(svc.image_url || null);
     setShowForm(true);
   };
 
   const openNew = () => {
     setEditService(null);
+    setImageUrl(null);
     setShowForm(true);
   };
 
@@ -418,10 +422,12 @@ function ServicesTab() {
               <Label htmlFor="svc-desc">Description</Label>
               <Textarea id="svc-desc" name="description" rows={2} defaultValue={editService?.description || ""} />
             </div>
-            <div>
-              <Label htmlFor="svc-img">Image URL</Label>
-              <Input id="svc-img" name="image_url" defaultValue={editService?.image_url || ""} />
-            </div>
+            <ImageUpload
+              value={imageUrl}
+              onChange={setImageUrl}
+              label="Service Image"
+              folder="home-services"
+            />
             <div>
               <Label htmlFor="svc-order">Sort Order</Label>
               <Input id="svc-order" name="sort_order" type="number" defaultValue={editService?.sort_order || 0} />
