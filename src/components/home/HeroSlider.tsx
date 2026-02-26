@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import AppointmentSearchWidget from "./AppointmentSearchWidget";
 
 const fallbackSlides = [
   {
@@ -61,36 +62,44 @@ export function HeroSlider() {
           </div>
 
           <div className="container relative mx-auto flex h-full items-center px-4">
-            <div className="max-w-2xl text-background">
-              <h1
-                className={`font-display text-4xl font-bold leading-tight md:text-5xl lg:text-6xl ${
-                  index === currentSlide ? "animate-fade-up" : ""
-                }`}
-                style={{ animationDelay: "0.2s" }}
-              >
-                {slide.title}
-              </h1>
-              {slide.subtitle && (
-                <p
-                  className={`mt-4 text-lg text-background/90 md:mt-6 md:text-xl ${
+            <div className="flex w-full flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
+              <div className="max-w-xl text-background">
+                <h1
+                  className={`font-display text-4xl font-bold leading-tight md:text-5xl lg:text-6xl ${
                     index === currentSlide ? "animate-fade-up" : ""
                   }`}
-                  style={{ animationDelay: "0.4s" }}
+                  style={{ animationDelay: "0.2s" }}
                 >
-                  {slide.subtitle}
-                </p>
-              )}
-              {slide.cta_text && slide.cta_link && (
-                <div
-                  className={`mt-6 md:mt-8 ${index === currentSlide ? "animate-fade-up" : ""}`}
-                  style={{ animationDelay: "0.6s" }}
-                >
-                  <Link to={slide.cta_link}>
-                    <Button variant="hero" size="xl" className="group">
-                      {slide.cta_text}
-                      <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </Link>
+                  {slide.title}
+                </h1>
+                {slide.subtitle && (
+                  <p
+                    className={`mt-4 text-lg text-background/90 md:mt-6 md:text-xl ${
+                      index === currentSlide ? "animate-fade-up" : ""
+                    }`}
+                    style={{ animationDelay: "0.4s" }}
+                  >
+                    {slide.subtitle}
+                  </p>
+                )}
+                {slide.cta_text && slide.cta_link && (
+                  <div
+                    className={`mt-6 md:mt-8 ${index === currentSlide ? "animate-fade-up" : ""}`}
+                    style={{ animationDelay: "0.6s" }}
+                  >
+                    <Link to={slide.cta_link}>
+                      <Button variant="hero" size="xl" className="group">
+                        {slide.cta_text}
+                        <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {index === currentSlide && (
+                <div className="hidden lg:block">
+                  <AppointmentSearchWidget />
                 </div>
               )}
             </div>
