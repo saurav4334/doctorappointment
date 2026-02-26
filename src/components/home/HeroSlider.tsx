@@ -62,44 +62,36 @@ export function HeroSlider() {
           </div>
 
           <div className="container relative mx-auto flex h-full items-center px-4">
-            <div className="flex w-full flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
-              <div className="max-w-xl text-background">
-                <h1
-                  className={`font-display text-4xl font-bold leading-tight md:text-5xl lg:text-6xl ${
+            <div className="max-w-xl text-background">
+              <h1
+                className={`font-display text-4xl font-bold leading-tight md:text-5xl lg:text-6xl ${
+                  index === currentSlide ? "animate-fade-up" : ""
+                }`}
+                style={{ animationDelay: "0.2s" }}
+              >
+                {slide.title}
+              </h1>
+              {slide.subtitle && (
+                <p
+                  className={`mt-4 text-lg text-background/90 md:mt-6 md:text-xl ${
                     index === currentSlide ? "animate-fade-up" : ""
                   }`}
-                  style={{ animationDelay: "0.2s" }}
+                  style={{ animationDelay: "0.4s" }}
                 >
-                  {slide.title}
-                </h1>
-                {slide.subtitle && (
-                  <p
-                    className={`mt-4 text-lg text-background/90 md:mt-6 md:text-xl ${
-                      index === currentSlide ? "animate-fade-up" : ""
-                    }`}
-                    style={{ animationDelay: "0.4s" }}
-                  >
-                    {slide.subtitle}
-                  </p>
-                )}
-                {slide.cta_text && slide.cta_link && (
-                  <div
-                    className={`mt-6 md:mt-8 ${index === currentSlide ? "animate-fade-up" : ""}`}
-                    style={{ animationDelay: "0.6s" }}
-                  >
-                    <Link to={slide.cta_link}>
-                      <Button variant="hero" size="xl" className="group">
-                        {slide.cta_text}
-                        <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {index === currentSlide && (
-                <div className="hidden lg:block">
-                  <AppointmentSearchWidget />
+                  {slide.subtitle}
+                </p>
+              )}
+              {slide.cta_text && slide.cta_link && (
+                <div
+                  className={`mt-6 md:mt-8 ${index === currentSlide ? "animate-fade-up" : ""}`}
+                  style={{ animationDelay: "0.6s" }}
+                >
+                  <Link to={slide.cta_link}>
+                    <Button variant="hero" size="xl" className="group">
+                      {slide.cta_text}
+                      <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -107,24 +99,33 @@ export function HeroSlider() {
         </div>
       ))}
 
+      {/* Appointment widget positioned absolutely so it persists across slides */}
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <div className="container mx-auto flex h-full items-center justify-end px-4">
+          <div className="pointer-events-auto hidden lg:block">
+            <AppointmentSearchWidget />
+          </div>
+        </div>
+      </div>
+
       {slides.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-background/20 p-3 text-background backdrop-blur-sm transition-all hover:bg-background/40"
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-background/20 p-3 text-background backdrop-blur-sm transition-all hover:bg-background/40"
             aria-label="Previous slide"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-background/20 p-3 text-background backdrop-blur-sm transition-all hover:bg-background/40"
+            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-background/20 p-3 text-background backdrop-blur-sm transition-all hover:bg-background/40"
             aria-label="Next slide"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
 
-          <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">
             {slides.map((_, index) => (
               <button
                 key={index}
