@@ -1,140 +1,82 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
+import { Phone, Mail, MapPin, Globe, Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-foreground text-background">
-      {/* Main footer */}
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xl font-bold text-primary-foreground">M</span>
+    <footer>
+      {/* Main footer - navy blue matching logo */}
+      <div className="bg-primary text-primary-foreground">
+        <div className="container mx-auto px-4 py-10 md:py-14">
+          <div className="grid gap-8 md:grid-cols-3 items-start">
+            {/* Brand / Logo */}
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <img src="/logo.png" alt="Doctors AppointmentBD" className="h-14 object-contain" />
+              </Link>
+            </div>
+
+            {/* Address & Web */}
+            <div className="space-y-2 text-sm text-primary-foreground/85 text-center">
+              <div className="flex items-start gap-2 justify-center">
+                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>17-18, Hossain Housing Society, Shyamoli, Dhaka-1215</span>
               </div>
-              <span className="font-display text-xl font-bold text-background">
-                MediCare
-              </span>
-            </Link>
-            <p className="text-sm text-background/70">
-              Your trusted healthcare partner. We connect patients with experienced doctors 
-              across multiple hospitals, making quality healthcare accessible to everyone.
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-background/60 transition-colors hover:text-primary">
-                <Facebook className="h-5 w-5" />
+              <div className="flex items-center gap-2 justify-center">
+                <Mail className="h-4 w-4 shrink-0" />
+                <a href="mailto:doctorsappointmentbd@gmail.com" className="hover:underline">
+                  doctorsappointmentbd@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center gap-2 justify-center">
+                <Globe className="h-4 w-4 shrink-0" />
+                <a href="https://www.doctorsappointmentbd.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  www.doctorsappointmentbd.com
+                </a>
+              </div>
+            </div>
+
+            {/* Contact Numbers */}
+            <div className="space-y-2 text-sm text-primary-foreground/85 text-right">
+              <p className="font-semibold text-primary-foreground">Contact:</p>
+              <a href="tel:+8801720003113" className="flex items-center gap-2 justify-end hover:underline">
+                <Phone className="h-4 w-4 shrink-0" />
+                +880 1720 003113
               </a>
-              <a href="#" className="text-background/60 transition-colors hover:text-primary">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-background/60 transition-colors hover:text-primary">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-background/60 transition-colors hover:text-primary">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-background/60 transition-colors hover:text-primary">
-                <Youtube className="h-5 w-5" />
+              <a href="tel:+8801771588599" className="flex items-center gap-2 justify-end hover:underline">
+                <Phone className="h-4 w-4 shrink-0" />
+                +880 1771 588599
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="mb-4 font-display text-lg font-semibold">Quick Links</h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link to="/doctors" className="text-background/70 transition-colors hover:text-primary">
-                  Find a Doctor
-                </Link>
-              </li>
-              <li>
-                <Link to="/departments" className="text-background/70 transition-colors hover:text-primary">
-                  Departments
-                </Link>
-              </li>
-              <li>
-                <Link to="/packages" className="text-background/70 transition-colors hover:text-primary">
-                  Health Packages
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-background/70 transition-colors hover:text-primary">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-background/70 transition-colors hover:text-primary">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* For Hospitals */}
-          <div>
-            <h4 className="mb-4 font-display text-lg font-semibold">For Hospitals</h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link to="/hospital-register" className="text-background/70 transition-colors hover:text-primary">
-                  Register Your Hospital
-                </Link>
-              </li>
-              <li>
-                <Link to="/hospital-login" className="text-background/70 transition-colors hover:text-primary">
-                  Hospital Login
-                </Link>
-              </li>
-              <li>
-                <Link to="/partner-benefits" className="text-background/70 transition-colors hover:text-primary">
-                  Partner Benefits
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" className="text-background/70 transition-colors hover:text-primary">
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="mb-4 font-display text-lg font-semibold">Contact Us</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span className="text-background/70">
-                  House 42, Road 7, Gulshan-2<br />
-                  Dhaka 1212, Bangladesh
-                </span>
-              </li>
-              <li>
-                <a href="tel:+8809678123456" className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary">
-                  <Phone className="h-4 w-4 shrink-0 text-primary" />
-                  +880 9678 123456
-                </a>
-              </li>
-              <li>
-                <a href="mailto:info@medicare.com" className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary">
-                  <Mail className="h-4 w-4 shrink-0 text-primary" />
-                  info@medicare.com
-                </a>
-              </li>
-            </ul>
+          {/* Social links */}
+          <div className="mt-8 flex justify-center gap-5">
+            <a href="#" className="text-primary-foreground/60 transition-colors hover:text-primary-foreground">
+              <Facebook className="h-5 w-5" />
+            </a>
+            <a href="#" className="text-primary-foreground/60 transition-colors hover:text-primary-foreground">
+              <Twitter className="h-5 w-5" />
+            </a>
+            <a href="#" className="text-primary-foreground/60 transition-colors hover:text-primary-foreground">
+              <Linkedin className="h-5 w-5" />
+            </a>
+            <a href="#" className="text-primary-foreground/60 transition-colors hover:text-primary-foreground">
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a href="#" className="text-primary-foreground/60 transition-colors hover:text-primary-foreground">
+              <Youtube className="h-5 w-5" />
+            </a>
           </div>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-background/10">
-        <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 text-sm text-background/60 md:flex-row">
-          <p>© 2026 MediCare. All rights reserved.</p>
+      <div className="bg-primary/90 border-t border-primary-foreground/10">
+        <div className="container mx-auto flex flex-col items-center justify-between gap-3 px-4 py-4 text-xs text-primary-foreground/60 md:flex-row">
+          <p>© {new Date().getFullYear()} Doctors AppointmentBD. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link to="/privacy" className="transition-colors hover:text-primary">Privacy Policy</Link>
-            <Link to="/terms" className="transition-colors hover:text-primary">Terms of Service</Link>
-            <Link to="/cookies" className="transition-colors hover:text-primary">Cookie Policy</Link>
+            <Link to="/privacy" className="transition-colors hover:text-primary-foreground">Privacy Policy</Link>
+            <Link to="/terms" className="transition-colors hover:text-primary-foreground">Terms of Service</Link>
           </div>
         </div>
       </div>
