@@ -43,6 +43,7 @@ import {
   MapPin,
   Calendar,
   Clock,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -77,8 +78,21 @@ export default function HomeServiceManagement() {
 /* ─── Requests Tab ─── */
 function RequestsTab() {
   const [statusFilter, setStatusFilter] = useState("all");
+  const [serviceFilter, setServiceFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [viewRequest, setViewRequest] = useState<any>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createServiceId, setCreateServiceId] = useState("");
+  const [createStatus, setCreateStatus] = useState("pending");
   const queryClient = useQueryClient();
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["admin-home-services-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("home_services").select("id, name").order("sort_order");
+      return data || [];
+    },
+  });
 
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ["admin-home-service-requests"],
@@ -117,7 +131,45 @@ function RequestsTab() {
     },
   });
 
-  const filtered = statusFilter === "all" ? requests : requests.filter((r: any) => r.status === statusFilter);
+  const createRequest = useMutation({
+    mutationFn: async (data: any) => {
+      const { error } = await supabase.from("home_service_requests").insert(data);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-home-service-requests"] });
+      toast.success("Request created");
+      setShowCreateForm(false);
+    },
+    onError: () => toast.error("Failed to create request"),
+  });
+
+  const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    createRequest.mutate({
+      service_id: createServiceId || null,
+      patient_name: form.get("patient_name") as string,
+      phone: form.get("phone") as string,
+      email: (form.get("email") as string) || null,
+      address: form.get("address") as string,
+      preferred_date: (form.get("preferred_date") as string) || null,
+      preferred_time: (form.get("preferred_time") as string) || null,
+      notes: (form.get("notes") as string) || null,
+      status: createStatus,
+    });
+  };
+
+  const filtered = requests.filter((r: any) => {
+    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+    const matchesService = serviceFilter === "all" || r.service_id === serviceFilter;
+    const matchesSearch =
+      !searchQuery ||
+      r.patient_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.phone?.includes(searchQuery) ||
+      r.address?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesService && matchesSearch;
+  });
 
   const statusColor = (s: string) => {
     switch (s) {
@@ -131,20 +183,46 @@ function RequestsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Filter status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="confirmed">Confirmed</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-        <span className="text-sm text-muted-foreground">{filtered.length} requests</span>
+      {/* Filters row */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search name, phone, address..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-56"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={serviceFilter} onValueChange={setServiceFilter}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Service" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Services</SelectItem>
+              {services.map((s: any) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-muted-foreground">{filtered.length} requests</span>
+        </div>
+        <Button onClick={() => setShowCreateForm(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Create Request
+        </Button>
       </div>
 
       {isLoading ? (
@@ -159,6 +237,7 @@ function RequestsTab() {
                 <TableHead>Patient</TableHead>
                 <TableHead>Service</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Address</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -170,6 +249,7 @@ function RequestsTab() {
                   <TableCell className="font-medium">{req.patient_name}</TableCell>
                   <TableCell>{req.home_services?.name || "—"}</TableCell>
                   <TableCell>{req.phone}</TableCell>
+                  <TableCell className="max-w-[150px] truncate">{req.address}</TableCell>
                   <TableCell>
                     {req.preferred_date ? format(new Date(req.preferred_date), "dd MMM yyyy") : "—"}
                   </TableCell>
@@ -272,6 +352,79 @@ function RequestsTab() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Request Dialog */}
+      <Dialog open={showCreateForm} onOpenChange={(open) => { setShowCreateForm(open); if (!open) { setCreateServiceId(""); setCreateStatus("pending"); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Home Service Request</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateSubmit} className="space-y-4">
+            <div>
+              <Label>Service *</Label>
+              <Select value={createServiceId} onValueChange={setCreateServiceId}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select service" />
+                </SelectTrigger>
+                <SelectContent>
+                  {services.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="cr-name">Patient Name *</Label>
+                <Input id="cr-name" name="patient_name" required />
+              </div>
+              <div>
+                <Label htmlFor="cr-phone">Phone *</Label>
+                <Input id="cr-phone" name="phone" type="tel" required />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="cr-email">Email</Label>
+              <Input id="cr-email" name="email" type="email" />
+            </div>
+            <div>
+              <Label htmlFor="cr-address">Address *</Label>
+              <Input id="cr-address" name="address" required />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="cr-date">Preferred Date</Label>
+                <Input id="cr-date" name="preferred_date" type="date" />
+              </div>
+              <div>
+                <Label htmlFor="cr-time">Preferred Time</Label>
+                <Input id="cr-time" name="preferred_time" type="time" />
+              </div>
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select value={createStatus} onValueChange={setCreateStatus}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="cr-notes">Notes</Label>
+              <Textarea id="cr-notes" name="notes" rows={2} />
+            </div>
+            <Button type="submit" className="w-full" disabled={createRequest.isPending}>
+              {createRequest.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Request
+            </Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
