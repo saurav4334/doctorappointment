@@ -54,7 +54,10 @@ export default function AppointmentSearchWidget() {
       if (selectedCity) params.set("location", selectedCity);
       navigate(`/doctors${params.toString() ? `?${params}` : ""}`);
     } else if (searchType === "hospital") {
-      navigate("/departments");
+      const params = new URLSearchParams();
+      if (selectedCity) params.set("city", selectedCity);
+      if (selectedHospital) params.set("id", selectedHospital);
+      navigate(`/hospitals${params.toString() ? `?${params}` : ""}`);
     } else {
       navigate("/ambulance");
     }
