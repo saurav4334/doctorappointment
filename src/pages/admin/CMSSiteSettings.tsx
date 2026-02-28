@@ -84,6 +84,7 @@ export default function CMSSiteSettings() {
     { key: "contact", label: "Contact" },
     { key: "social", label: "Social Links" },
     { key: "seo", label: "SEO" },
+    { key: "tracking", label: "Tracking & Analytics" },
     { key: "chat", label: "Chat Widget" },
     { key: "email", label: "Email / SMTP" },
   ];

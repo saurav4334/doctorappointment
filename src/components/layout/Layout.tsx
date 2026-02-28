@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import { FloatingChatWidget } from "@/components/FloatingChatWidget";
+import { TrackingScripts } from "./TrackingScripts";
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
+      <TrackingScripts />
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
