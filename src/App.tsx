@@ -86,6 +86,9 @@ const App = () => (
           <Route path="/hospitals/:slug" element={<HospitalDetail />} />
           <Route path="/hospital-register" element={<HospitalRegister />} />
           
+          {/* Dynamic department slug at root level (e.g. /cardiology) */}
+          <Route path="/:slug" element={<DepartmentDoctors />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
