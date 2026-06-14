@@ -29,5 +29,7 @@ class DatabaseSeeder extends Seeder
         if (! $admin->hasRole('super_admin')) {
             $admin->assignRole('super_admin');
         }
+
+        $this->call(DemoContentSeeder::class);
     }
 }

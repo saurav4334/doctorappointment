@@ -1,3 +1,82 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+  Doctors AppointmentBD Design System
+  Primary: Deep Navy Blue (from logo) | Secondary: Sky Blue accent
+*/
+
+@layer base {
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 215 30% 15%;
+
+        --card: 0 0% 100%;
+        --card-foreground: 215 30% 15%;
+
+        --popover: 0 0% 100%;
+        --popover-foreground: 215 30% 15%;
+
+        --primary: 212 55% 25%;
+        --primary-foreground: 0 0% 100%;
+
+        --secondary: 205 60% 45%;
+        --secondary-foreground: 0 0% 100%;
+
+        --muted: 215 20% 96%;
+        --muted-foreground: 215 15% 45%;
+
+        --accent: 210 50% 95%;
+        --accent-foreground: 212 55% 25%;
+
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 215 20% 90%;
+        --input: 215 20% 90%;
+        --ring: 212 55% 25%;
+
+        --radius: 0.75rem;
+
+        --hero-gradient: linear-gradient(135deg, hsl(212 55% 25%) 0%, hsl(212 45% 18%) 100%);
+        --card-shadow: 0 4px 20px -4px hsl(215 30% 15% / 0.08);
+        --card-shadow-hover: 0 8px 30px -4px hsl(215 30% 15% / 0.15);
+        --text-gradient: linear-gradient(135deg, hsl(212 55% 25%) 0%, hsl(205 60% 45%) 100%);
+    }
+
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground antialiased;
+        font-family: 'DM Sans', system-ui, sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Playfair Display', serif;
+        @apply font-semibold tracking-tight;
+    }
+}
+
+@layer utilities {
+    .text-gradient {
+        background: var(--text-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-gradient {
+        background: var(--hero-gradient);
+    }
+
+    .card-shadow {
+        box-shadow: var(--card-shadow);
+    }
+
+    .card-shadow-hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+}

@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Public site
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
+Route::get('/doctors/{doctor:slug}', [DoctorController::class, 'show'])->name('doctors.show');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
