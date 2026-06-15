@@ -13,9 +13,9 @@ class AdvertisementController extends Controller
     use HandlesImageUpload;
 
     public const PLACEMENTS = [
-        'hero_bottom' => 'Hero Bottom Banner (1200×280)',
-        'mid_homepage' => 'Mid Homepage Banner (1100×220)',
-        'footer_banner' => 'Footer Sponsor Strip (max 120px)',
+        'hero_bottom' => 'Hero Bottom Banner (1200×240)',
+        'mid_homepage' => 'Mid Homepage Banner (1200×260)',
+        'footer_banner' => 'Footer Sponsor Strip (1200×120)',
         'sidebar' => 'Sidebar (300×600)',
     ];
 

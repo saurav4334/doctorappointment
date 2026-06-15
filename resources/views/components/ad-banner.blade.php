@@ -1,6 +1,6 @@
 @php
     $wrapper = $placement === 'sidebar' ? '' : 'container mx-auto px-4';
-    $inner = 'group relative block w-full overflow-hidden rounded-2xl shadow-sm '.$sizeClass;
+    $inner = 'group relative block w-full overflow-hidden rounded-lg border border-border/60 shadow-sm '.$sizeClass;
     // Desktop hover only applies when the banner is clickable.
     $hover = $href ? ' transition-transform duration-300 hover:scale-[1.01] hover:shadow-md' : '';
 @endphp

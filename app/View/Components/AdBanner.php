@@ -20,9 +20,9 @@ class AdBanner extends Component
      * subtle and balanced instead of oversized).
      */
     protected array $sizeClasses = [
-        'hero_bottom'   => 'h-[160px] sm:h-[220px] lg:h-[280px]',  // desktop ≤280px
-        'mid_homepage'  => 'h-[140px] sm:h-[180px] lg:h-[220px]',  // landscape card
-        'footer_banner' => 'h-[100px] sm:h-[120px]',               // slim sponsor strip
+        'hero_bottom'   => 'h-[90px] md:h-[160px]',   // slim sponsor banner
+        'mid_homepage'  => 'h-[110px] md:h-[180px]',  // compact landscape banner
+        'footer_banner' => 'h-[60px] md:h-[80px]',    // slim sponsor strip
         'sidebar'       => 'aspect-[300/600]',
     ];
 

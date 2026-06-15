@@ -8,7 +8,7 @@
     <x-hero :slides="$heroSlides" />
 
     {{-- 2. Advertisement banner (below hero) --}}
-    <x-ad-banner placement="hero_bottom" class="mt-8" />
+    <x-ad-banner placement="hero_bottom" class="mt-6" />
 
     {{-- 3. Top Rated Doctors --}}
     @if ($featuredDoctors->isNotEmpty())
@@ -32,7 +32,7 @@
     @endif
 
     {{-- Advertisement banner (between Top Rated Doctors and Departments) --}}
-    <x-ad-banner placement="mid_homepage" class="mb-4" />
+    <x-ad-banner placement="mid_homepage" class="my-2" />
 
     {{-- 4. Departments --}}
     @if ($departments->isNotEmpty())
@@ -139,5 +139,5 @@
     <x-cta-section />
 
     {{-- Footer sponsor strip (after CTA, just before the footer) --}}
-    <x-ad-banner placement="footer_banner" class="mb-12" />
+    <x-ad-banner placement="footer_banner" class="mb-8" />
 @endsection

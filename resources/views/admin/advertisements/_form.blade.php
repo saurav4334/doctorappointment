@@ -28,7 +28,7 @@
             <x-admin.card>
                 <h3 class="mb-4 font-display text-base font-semibold text-foreground">Banner Image @if (!$isEdit)<span class="text-destructive">*</span>@endif</h3>
                 <x-admin.image-upload name="image" label="" :value="$advertisement->image"
-                    hint="Hero 1200×280 · Mid 1100×220 · Footer strip ≤120px · Max 5MB · JPG, PNG, GIF, WEBP" />
+                    hint="Hero 1200×240 · Mid 1200×260 · Footer strip 1200×120 · Max 5MB · JPG, PNG, GIF, WEBP" />
                 <p class="mt-2 text-xs text-muted-foreground">Animated GIFs are kept as-is (not compressed). Transparent PNG/WebP supported.</p>
             </x-admin.card>
             <x-admin.card>
