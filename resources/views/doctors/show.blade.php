@@ -142,35 +142,143 @@
             </div>
 
             {{-- Booking sidebar --}}
-            <div class="lg:col-span-1">
-                <div class="sticky top-24 rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div class="lg:col-span-1" id="booking">
+                <div class="sticky top-24 rounded-xl border border-border bg-card p-5 shadow-sm"
+                     x-data="bookingForm({
+                        slotsUrl: '{{ route('booking.slots', $doctor->slug) }}',
+                        oldDate: '{{ old('appointment_date') }}',
+                        oldTime: '{{ old('appointment_time') }}',
+                     })" x-init="init()">
                     <div class="flex items-center justify-between">
                         <h3 class="font-display text-base font-semibold text-foreground">Book Appointment</h3>
                         <div class="text-right">
-                            <span class="text-lg font-bold text-primary">৳{{ $fee + 50 }}</span>
-                            <p class="text-xs text-muted-foreground">Total</p>
+                            <span class="text-lg font-bold text-primary">৳{{ $fee }}</span>
+                            <p class="text-xs text-muted-foreground">Fee</p>
                         </div>
                     </div>
 
-                    <dl class="mt-4 space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <dt class="text-muted-foreground">Consultation Fee</dt>
-                            <dd class="font-medium text-foreground">৳{{ $fee }}</dd>
+                    @if (session('booking_success'))
+                        <div class="mt-4 rounded-lg border border-green-200 bg-green-50 px-3 py-3 text-sm text-green-800">
+                            {{ session('booking_success') }}
                         </div>
-                        <div class="flex justify-between">
-                            <dt class="text-muted-foreground">Service Charge</dt>
-                            <dd class="font-medium text-foreground">৳50</dd>
-                        </div>
-                        <div class="flex justify-between border-t border-border pt-2">
-                            <dt class="text-muted-foreground">Hospital</dt>
-                            <dd class="text-right font-medium text-foreground">{{ $hospitalName }}</dd>
-                        </div>
-                    </dl>
+                    @endif
 
-                    <x-btn href="tel:+8809678123456" variant="hero" class="mt-5 w-full">Book Appointment</x-btn>
-                    <p class="mt-3 text-center text-xs text-muted-foreground">Online booking flow coming soon — call us to confirm your slot.</p>
+                    <form method="POST" action="{{ route('booking.store', $doctor->slug) }}" class="mt-4 space-y-4">
+                        @csrf
+
+                        {{-- Date --}}
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-foreground">Select date</label>
+                            <input type="date" name="appointment_date" x-model="date" :min="today"
+                                   @change="loadSlots()"
+                                   class="h-10 w-full rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary" required>
+                            @error('appointment_date')<p class="mt-1 text-xs text-destructive">{{ $message }}</p>@enderror
+                        </div>
+
+                        {{-- Slots --}}
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-foreground">Available time</label>
+                            <input type="hidden" name="appointment_time" x-model="selectedTime">
+                            <template x-if="loading">
+                                <p class="text-sm text-muted-foreground">Loading slots…</p>
+                            </template>
+                            <template x-if="!loading && date && slots.length === 0">
+                                <p class="text-sm text-muted-foreground">No slots available on this date.</p>
+                            </template>
+                            <template x-if="!date">
+                                <p class="text-sm text-muted-foreground">Choose a date to see available times.</p>
+                            </template>
+                            <div class="grid grid-cols-3 gap-2" x-show="!loading && slots.length > 0">
+                                <template x-for="slot in slots" :key="slot.value">
+                                    <button type="button"
+                                            @click="slot.available && (selectedTime = slot.value)"
+                                            :disabled="!slot.available"
+                                            :class="{
+                                                'bg-primary text-primary-foreground border-primary': selectedTime === slot.value,
+                                                'opacity-40 cursor-not-allowed line-through': !slot.available,
+                                                'hover:border-primary': slot.available && selectedTime !== slot.value
+                                            }"
+                                            class="rounded-lg border border-border px-2 py-1.5 text-xs font-medium transition-colors"
+                                            x-text="slot.label"></button>
+                                </template>
+                            </div>
+                            @error('appointment_time')<p class="mt-1 text-xs text-destructive">{{ $message }}</p>@enderror
+                        </div>
+
+                        {{-- Patient details --}}
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-foreground">Full name</label>
+                            <input type="text" name="patient_name" value="{{ old('patient_name') }}" required
+                                   class="h-10 w-full rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary">
+                            @error('patient_name')<p class="mt-1 text-xs text-destructive">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-foreground">Phone</label>
+                            <input type="tel" name="patient_phone" value="{{ old('patient_phone') }}" required
+                                   class="h-10 w-full rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary">
+                            @error('patient_phone')<p class="mt-1 text-xs text-destructive">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-foreground">Email <span class="text-muted-foreground">(optional)</span></label>
+                            <input type="email" name="patient_email" value="{{ old('patient_email') }}"
+                                   class="h-10 w-full rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary">
+                            @error('patient_email')<p class="mt-1 text-xs text-destructive">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-foreground">Problem / notes <span class="text-muted-foreground">(optional)</span></label>
+                            <textarea name="notes" rows="2"
+                                      class="w-full rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary">{{ old('notes') }}</textarea>
+                        </div>
+
+                        <button type="submit"
+                                class="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 disabled:opacity-50"
+                                :disabled="!selectedTime">
+                            Request Appointment
+                        </button>
+                        <p class="text-center text-xs text-muted-foreground">Consultation fee ৳{{ $fee }} · {{ $hospitalName }}</p>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function bookingForm(config) {
+            return {
+                today: new Date().toISOString().split('T')[0],
+                date: config.oldDate || '',
+                slots: [],
+                selectedTime: '',
+                loading: false,
+                init() {
+                    if (this.date) {
+                        this.loadSlots(config.oldTime || '');
+                    }
+                },
+                async loadSlots(preselect = '') {
+                    if (!this.date) return;
+                    this.loading = true;
+                    this.slots = [];
+                    this.selectedTime = '';
+                    try {
+                        const res = await fetch(`${config.slotsUrl}?date=${this.date}`, {
+                            headers: { 'Accept': 'application/json' },
+                        });
+                        const data = await res.json();
+                        this.slots = data.slots || [];
+                        if (preselect) {
+                            const match = this.slots.find(s => s.value === preselect && s.available);
+                            if (match) this.selectedTime = preselect;
+                        }
+                    } catch (e) {
+                        this.slots = [];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+            };
+        }
+    </script>
+    @endpush
 @endsection

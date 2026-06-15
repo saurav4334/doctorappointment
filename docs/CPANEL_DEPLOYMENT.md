@@ -200,6 +200,23 @@ php artisan optimize
 
 ---
 
+## Scheduled tasks & notifications
+
+The notification system works **without** a queue worker by default
+(`notifications.queue=false` → delivered inline during the request). Channels are
+currently **mock** (logged to `notification_logs`, no external send) until you plug in a
+real provider — see the channel classes in `app/Notifications/Channels/`.
+
+- **Appointment reminders** (cron). In cPanel → **Cron Jobs**, add a daily job:
+  ```bash
+  cd /home/USER/doctorappointment && /usr/local/bin/php artisan appointments:send-reminders >> storage/logs/cron.log 2>&1
+  ```
+- **Optional queue** (only if you set `NOTIFICATIONS_QUEUE=true`): run a per-minute cron to
+  drain the database queue without a long-running worker:
+  ```bash
+  cd /home/USER/doctorappointment && /usr/local/bin/php artisan queue:work --stop-when-empty >> storage/logs/queue.log 2>&1
+  ```
+
 ## Troubleshooting common 500 errors
 
 | Symptom | Cause | Fix |

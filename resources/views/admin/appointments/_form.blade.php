@@ -36,7 +36,8 @@
                     </x-admin.field>
                     <x-admin.input name="appointment_date" label="Date" type="date" :value="optional($appointment->appointment_date)->format('Y-m-d')" required />
                     <x-admin.input name="appointment_time" label="Time" type="time" :value="$appointment->appointment_time ? \Illuminate\Support\Str::substr($appointment->appointment_time, 0, 5) : ''" required />
-                    <x-admin.textarea name="notes" label="Notes" :value="$appointment->notes" class="sm:col-span-2" />
+                    <x-admin.textarea name="notes" label="Patient Notes" :value="$appointment->notes" class="sm:col-span-2" hint="Submitted by the patient." />
+                    <x-admin.textarea name="admin_notes" label="Internal Notes" :value="$appointment->admin_notes" class="sm:col-span-2" hint="Staff only — not shown to the patient." />
                 </div>
             </x-admin.card>
         </div>

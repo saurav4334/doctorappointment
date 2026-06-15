@@ -17,12 +17,14 @@ class DoctorSchedule extends Model
         'start_time',
         'end_time',
         'slot_duration',
+        'max_appointments',
         'is_active',
     ];
 
     protected $casts = [
         'day_of_week' => 'integer',
         'slot_duration' => 'integer',
+        'max_appointments' => 'integer',
         'is_active' => 'boolean',
     ];
 

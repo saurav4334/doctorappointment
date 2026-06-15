@@ -16,7 +16,21 @@
     <x-admin.card padding="p-0">
         <div class="p-5 pb-0">
             <x-admin.filter-bar :action="route('admin.appointments.index')" :search="$search" placeholder="Search by patient name or phone..."
-                :statuses="$statusOptions" :status="$status" />
+                :statuses="$statusOptions" :status="$status">
+                <select name="doctor_id" class="h-10 rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary sm:w-44">
+                    <option value="">All Doctors</option>
+                    @foreach ($doctors as $d)
+                        <option value="{{ $d->id }}" @selected((string) $doctorId === (string) $d->id)>{{ $d->full_name }}</option>
+                    @endforeach
+                </select>
+                <select name="hospital_id" class="h-10 rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary sm:w-44">
+                    <option value="">All Hospitals</option>
+                    @foreach ($hospitals as $h)
+                        <option value="{{ $h->id }}" @selected((string) $hospitalId === (string) $h->id)>{{ $h->name }}</option>
+                    @endforeach
+                </select>
+                <input type="date" name="date" value="{{ $date }}" class="h-10 rounded-lg border-border bg-background text-sm focus:border-primary focus:ring-primary">
+            </x-admin.filter-bar>
         </div>
 
         @if ($appointments->isEmpty())
@@ -47,6 +61,16 @@
                                 <td class="px-5 py-3"><x-admin.status-badge :status="$a->status" /></td>
                                 <td class="px-5 py-3">
                                     <div class="flex items-center justify-end gap-2">
+                                        {{-- Quick status change --}}
+                                        <form method="POST" action="{{ route('admin.appointments.set-status', $a) }}">
+                                            @csrf @method('PATCH')
+                                            <select name="status" onchange="this.form.submit()"
+                                                    class="h-8 rounded-md border-border bg-background text-xs focus:border-primary focus:ring-primary">
+                                                @foreach (['pending' => 'Pending', 'confirmed' => 'Approve', 'completed' => 'Complete', 'cancelled' => 'Reject'] as $val => $label)
+                                                    <option value="{{ $val }}" @selected($a->status === $val)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        </form>
                                         <a href="{{ route('admin.appointments.edit', $a) }}" class="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-primary">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
                                         </a>

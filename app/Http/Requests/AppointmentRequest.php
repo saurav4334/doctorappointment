@@ -25,6 +25,7 @@ class AppointmentRequest extends FormRequest
             'status' => ['required', Rule::in(['pending', 'confirmed', 'completed', 'cancelled'])],
             'payment_status' => ['required', Rule::in(['unpaid', 'paid', 'refunded'])],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }
