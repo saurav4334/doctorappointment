@@ -10,7 +10,7 @@
     if ($value) {
         $existing = \Illuminate\Support\Str::startsWith($value, ['http://', 'https://'])
             ? $value
-            : \Illuminate\Support\Facades\Storage::url($value);
+            : \Illuminate\Support\Facades\Storage::disk('public')->url($value);
     }
 @endphp
 

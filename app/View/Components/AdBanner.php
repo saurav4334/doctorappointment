@@ -34,7 +34,7 @@ class AdBanner extends Component
         if ($this->ad) {
             $this->imageUrl = Str::startsWith($this->ad->image, ['http://', 'https://'])
                 ? $this->ad->image
-                : Storage::url($this->ad->image);
+                : Storage::disk('public')->url($this->ad->image);
             $this->href = $this->sanitizeUrl($this->ad->redirect_url);
             $this->external = $this->href !== null && ! Str::startsWith($this->href, '/');
         }

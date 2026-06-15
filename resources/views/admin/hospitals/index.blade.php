@@ -37,7 +37,7 @@
                     <tbody class="divide-y divide-border">
                         @foreach ($hospitals as $hospital)
                             @php
-                                $img = $hospital->image ? (\Illuminate\Support\Str::startsWith($hospital->image, ['http://','https://']) ? $hospital->image : \Illuminate\Support\Facades\Storage::url($hospital->image)) : null;
+                                $img = $hospital->image ? (\Illuminate\Support\Str::startsWith($hospital->image, ['http://','https://']) ? $hospital->image : \Illuminate\Support\Facades\Storage::disk('public')->url($hospital->image)) : null;
                             @endphp
                             <tr class="hover:bg-muted/30">
                                 <td class="px-5 py-3">

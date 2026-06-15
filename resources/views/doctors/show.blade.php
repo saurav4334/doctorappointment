@@ -5,7 +5,7 @@
     use Illuminate\Support\Facades\Storage;
 
     $fallback = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80';
-    $photo = $doctor->photo ? (Str::startsWith($doctor->photo, ['http://','https://']) ? $doctor->photo : Storage::url($doctor->photo)) : $fallback;
+    $photo = $doctor->photo ? (Str::startsWith($doctor->photo, ['http://','https://']) ? $doctor->photo : Storage::disk('public')->url($doctor->photo)) : $fallback;
     $specialty = $doctor->specializations[0] ?? 'General Physician';
     $hospitalName = $doctor->hospital_label ?? 'Hospital';
     $location = $doctor->hospital?->city ?? 'Dhaka';

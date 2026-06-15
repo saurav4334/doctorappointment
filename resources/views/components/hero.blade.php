@@ -5,7 +5,7 @@
 
     $items = collect($slides)->map(function ($s) use ($fallbackImage) {
         $img = $s->image
-            ? (\Illuminate\Support\Str::startsWith($s->image, ['http://', 'https://']) ? $s->image : \Illuminate\Support\Facades\Storage::url($s->image))
+            ? (\Illuminate\Support\Str::startsWith($s->image, ['http://', 'https://']) ? $s->image : \Illuminate\Support\Facades\Storage::disk('public')->url($s->image))
             : $fallbackImage;
         return [
             'title' => $s->title,

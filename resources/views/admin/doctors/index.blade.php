@@ -38,7 +38,7 @@
                     <tbody class="divide-y divide-border">
                         @foreach ($doctors as $doctor)
                             @php
-                                $photo = $doctor->photo ? (\Illuminate\Support\Str::startsWith($doctor->photo, ['http://','https://']) ? $doctor->photo : \Illuminate\Support\Facades\Storage::url($doctor->photo)) : null;
+                                $photo = $doctor->photo ? (\Illuminate\Support\Str::startsWith($doctor->photo, ['http://','https://']) ? $doctor->photo : \Illuminate\Support\Facades\Storage::disk('public')->url($doctor->photo)) : null;
                             @endphp
                             <tr class="hover:bg-muted/30">
                                 <td class="px-5 py-3">

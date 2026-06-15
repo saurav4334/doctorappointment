@@ -76,7 +76,7 @@
                     @foreach ($hospitals as $hospital)
                         @php
                             $himg = $hospital->image
-                                ? (\Illuminate\Support\Str::startsWith($hospital->image, ['http://','https://']) ? $hospital->image : \Illuminate\Support\Facades\Storage::url($hospital->image))
+                                ? (\Illuminate\Support\Str::startsWith($hospital->image, ['http://','https://']) ? $hospital->image : \Illuminate\Support\Facades\Storage::disk('public')->url($hospital->image))
                                 : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80';
                         @endphp
                         <div class="overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-lg">
@@ -114,7 +114,7 @@
                     @foreach ($testimonials as $t)
                         @php
                             $timg = $t->image
-                                ? (\Illuminate\Support\Str::startsWith($t->image, ['http://','https://']) ? $t->image : \Illuminate\Support\Facades\Storage::url($t->image))
+                                ? (\Illuminate\Support\Str::startsWith($t->image, ['http://','https://']) ? $t->image : \Illuminate\Support\Facades\Storage::disk('public')->url($t->image))
                                 : 'https://ui-avatars.com/api/?name='.urlencode($t->patient_name).'&background=1e3a5f&color=fff';
                         @endphp
                         <figure class="flex h-full flex-col rounded-xl border border-border bg-card p-6">

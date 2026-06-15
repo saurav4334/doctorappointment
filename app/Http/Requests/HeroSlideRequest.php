@@ -23,7 +23,9 @@ class HeroSlideRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:500'],
-            'image' => [...$imageRule, 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            // 'file' (not 'image') so animated GIF / WebP validate reliably across
+            // servers without getimagesize() quirks; stored as-is to keep animation.
+            'image' => [...$imageRule, 'file', 'mimes:jpeg,jpg,png,webp,gif', 'max:5120'],
             'button_text' => ['nullable', 'string', 'max:100'],
             'button_url' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

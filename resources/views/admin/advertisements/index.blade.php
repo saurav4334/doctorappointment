@@ -36,7 +36,7 @@
                     <tbody class="divide-y divide-border">
                         @foreach ($advertisements as $ad)
                             @php
-                                $img = $ad->image ? (\Illuminate\Support\Str::startsWith($ad->image, ['http://','https://']) ? $ad->image : \Illuminate\Support\Facades\Storage::url($ad->image)) : null;
+                                $img = $ad->image ? (\Illuminate\Support\Str::startsWith($ad->image, ['http://','https://']) ? $ad->image : \Illuminate\Support\Facades\Storage::disk('public')->url($ad->image)) : null;
                                 $expired = $ad->end_date && $ad->end_date->isPast();
                             @endphp
                             <tr class="hover:bg-muted/30">

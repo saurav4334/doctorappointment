@@ -36,7 +36,7 @@
                     <tbody class="divide-y divide-border">
                         @foreach ($heroSlides as $slide)
                             @php
-                                $img = $slide->image ? (\Illuminate\Support\Str::startsWith($slide->image, ['http://','https://']) ? $slide->image : \Illuminate\Support\Facades\Storage::url($slide->image)) : null;
+                                $img = $slide->image ? (\Illuminate\Support\Str::startsWith($slide->image, ['http://','https://']) ? $slide->image : \Illuminate\Support\Facades\Storage::disk('public')->url($slide->image)) : null;
                             @endphp
                             <tr class="hover:bg-muted/30">
                                 <td class="px-5 py-3">

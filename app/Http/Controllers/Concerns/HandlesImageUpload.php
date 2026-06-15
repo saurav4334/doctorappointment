@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Concerns;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 trait HandlesImageUpload
 {
     /**
      * Store an uploaded image on the public disk and return its relative path.
-     * Deletes the previous file (if it was a stored path) when replacing.
+     *
+     * - Keeps the previous image if no new file is uploaded.
+     * - Ensures the target folder exists.
+     * - Deletes the old file ONLY after the new one is stored successfully.
+     * - Throws on storage failure so the caller can fail gracefully (old image intact).
      */
     protected function storeImage(?UploadedFile $file, string $folder, ?string $previous = null): ?string
     {
@@ -17,9 +22,23 @@ trait HandlesImageUpload
             return $previous;
         }
 
-        $this->deleteImage($previous);
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($folder);
 
-        return $file->store($folder, 'public');
+        // storePublicly preserves the original file bytes (no resize), so animated
+        // GIFs and WebP transparency are kept intact.
+        $path = $file->storePublicly($folder, 'public');
+
+        if (! $path || ! $disk->exists($path)) {
+            throw new RuntimeException('The image could not be saved to storage.');
+        }
+
+        // New file is safely stored — now remove the old one.
+        if ($previous && $previous !== $path) {
+            $this->deleteImage($previous);
+        }
+
+        return $path;
     }
 
     /**

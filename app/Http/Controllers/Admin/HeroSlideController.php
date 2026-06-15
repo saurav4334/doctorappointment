@@ -35,7 +35,14 @@ class HeroSlideController extends Controller
     public function store(HeroSlideRequest $request)
     {
         $data = $request->validated();
-        $data['image'] = $this->storeImage($request->file('image'), 'hero-slides');
+
+        try {
+            $data['image'] = $this->storeImage($request->file('image'), 'hero-slides');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->withInput()->with('error', 'The image could not be uploaded. Please try a JPG, PNG, WebP or GIF under 5MB.');
+        }
 
         HeroSlide::create($data);
 
@@ -50,7 +57,16 @@ class HeroSlideController extends Controller
     public function update(HeroSlideRequest $request, HeroSlide $heroSlide)
     {
         $data = $request->validated();
-        $data['image'] = $this->storeImage($request->file('image'), 'hero-slides', $heroSlide->image);
+
+        try {
+            // Existing image is kept if no new file; old file is deleted only
+            // after the new one is stored successfully (see HandlesImageUpload).
+            $data['image'] = $this->storeImage($request->file('image'), 'hero-slides', $heroSlide->image);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->withInput()->with('error', 'The image could not be uploaded. Your existing slide image was kept. Please try a JPG, PNG, WebP or GIF under 5MB.');
+        }
 
         $heroSlide->update($data);
 
