@@ -127,4 +127,21 @@ class AdminCrudTest extends TestCase
             'title' => 'No Image Ad', 'placement' => 'mid_homepage',
         ])->assertSessionHasErrors('image');
     }
+
+    public function test_can_upload_gif_and_webp_advertisement(): void
+    {
+        Storage::fake('public');
+
+        foreach (['gif', 'webp'] as $ext) {
+            $this->post('/admin/advertisements', [
+                'title' => "Animated {$ext} ad",
+                'placement' => 'hero_bottom',
+                'image' => UploadedFile::fake()->create("banner.{$ext}", 200, "image/{$ext}"),
+                'is_active' => 1,
+                'sort_order' => 0,
+            ])->assertRedirect('/admin/advertisements')->assertSessionDoesntHaveErrors();
+
+            $this->assertDatabaseHas('advertisements', ['title' => "Animated {$ext} ad"]);
+        }
+    }
 }

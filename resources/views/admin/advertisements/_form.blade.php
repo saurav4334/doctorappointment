@@ -27,7 +27,9 @@
         <div class="space-y-6">
             <x-admin.card>
                 <h3 class="mb-4 font-display text-base font-semibold text-foreground">Banner Image @if (!$isEdit)<span class="text-destructive">*</span>@endif</h3>
-                <x-admin.image-upload name="image" label="" :value="$advertisement->image" hint="Use the recommended size for the chosen placement." />
+                <x-admin.image-upload name="image" label="" :value="$advertisement->image"
+                    hint="Hero 1200×280 · Mid 1100×220 · Footer strip ≤120px · Max 5MB · JPG, PNG, GIF, WEBP" />
+                <p class="mt-2 text-xs text-muted-foreground">Animated GIFs are kept as-is (not compressed). Transparent PNG/WebP supported.</p>
             </x-admin.card>
             <x-admin.card>
                 <x-admin.toggle name="is_active" label="Active" :checked="(bool) ($advertisement->is_active ?? true)" hint="Only active ads within their date window are shown" />

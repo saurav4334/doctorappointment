@@ -24,7 +24,9 @@ class AdvertisementRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'sponsor_name' => ['nullable', 'string', 'max:255'],
-            'image' => [...$imageRule, 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            // Animated GIF + WebP supported. 'mimetypes' (not 'image') so animated
+            // GIFs validate cleanly; stored as-is (no resize) to preserve animation.
+            'image' => [...$imageRule, 'file', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
             'redirect_url' => ['nullable', 'string', 'max:500'],
             'placement' => ['required', Rule::in(['hero_bottom', 'mid_homepage', 'sidebar', 'footer_banner'])],
             'is_active' => ['boolean'],

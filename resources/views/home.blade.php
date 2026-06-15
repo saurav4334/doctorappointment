@@ -31,6 +31,9 @@
         </section>
     @endif
 
+    {{-- Advertisement banner (between Top Rated Doctors and Departments) --}}
+    <x-ad-banner placement="mid_homepage" class="mb-4" />
+
     {{-- 4. Departments --}}
     @if ($departments->isNotEmpty())
         <section id="departments" class="scroll-mt-24 bg-muted/40 py-16 md:py-24">
@@ -133,6 +136,8 @@
     @endif
 
     {{-- Footer banner ad + CTA --}}
-    <x-ad-banner placement="footer_banner" class="my-12" />
     <x-cta-section />
+
+    {{-- Footer sponsor strip (after CTA, just before the footer) --}}
+    <x-ad-banner placement="footer_banner" class="mb-12" />
 @endsection

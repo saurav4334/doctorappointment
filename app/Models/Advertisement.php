@@ -27,6 +27,9 @@ class Advertisement extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'sort_order' => 'integer',
+        'impression_count' => 'integer',
+        'click_count' => 'integer',
+        'last_clicked_at' => 'datetime',
     ];
 
     /**

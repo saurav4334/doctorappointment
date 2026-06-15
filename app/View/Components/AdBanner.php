@@ -13,20 +13,23 @@ class AdBanner extends Component
     public ?string $imageUrl = null;
     public ?string $href = null;
     public bool $external = false;
-    public string $aspect;
+    public string $sizeClass;
 
-    /** Tailwind aspect helpers per placement (PRD banner sizes). */
-    protected array $aspects = [
-        'hero_bottom'   => 'aspect-[1920/300] min-h-[120px]',
-        'mid_homepage'  => 'aspect-[1200/250] min-h-[120px]',
+    /**
+     * Responsive, height-capped sizing per placement (PRD v2.0 — keeps banners
+     * subtle and balanced instead of oversized).
+     */
+    protected array $sizeClasses = [
+        'hero_bottom'   => 'h-[160px] sm:h-[220px] lg:h-[280px]',  // desktop ≤280px
+        'mid_homepage'  => 'h-[140px] sm:h-[180px] lg:h-[220px]',  // landscape card
+        'footer_banner' => 'h-[100px] sm:h-[120px]',               // slim sponsor strip
         'sidebar'       => 'aspect-[300/600]',
-        'footer_banner' => 'aspect-[1200/250] min-h-[120px]',
     ];
 
     public function __construct(public string $placement)
     {
         $this->ad = Advertisement::live()->placement($placement)->first();
-        $this->aspect = $this->aspects[$placement] ?? $this->aspects['mid_homepage'];
+        $this->sizeClass = $this->sizeClasses[$placement] ?? $this->sizeClasses['mid_homepage'];
 
         if ($this->ad) {
             $this->imageUrl = Str::startsWith($this->ad->image, ['http://', 'https://'])
