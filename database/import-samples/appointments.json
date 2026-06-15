@@ -1,0 +1,15 @@
+[
+  {
+    "id": "99999999-9999-9999-9999-appointment01",
+    "doctor_id": "33333333-3333-3333-3333-doctors000001",
+    "hospital_id": "22222222-2222-2222-2222-hospitals0001",
+    "patient_name": "Sample Patient",
+    "patient_phone": "+8801700000000",
+    "patient_email": "patient@example.com",
+    "appointment_date": "2026-06-20",
+    "appointment_time": "18:30:00",
+    "status": "confirmed",
+    "payment_status": "paid",
+    "notes": "Follow-up visit."
+  }
+]

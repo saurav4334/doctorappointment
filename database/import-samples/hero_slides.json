@@ -1,0 +1,12 @@
+[
+  {
+    "id": "66666666-6666-6666-6666-heroslide0001",
+    "title": "Sample — Healthcare Anytime, Anywhere",
+    "subtitle": "Book trusted specialist doctors near you.",
+    "image_url": "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1920&q=80",
+    "cta_text": "Find a Doctor",
+    "cta_link": "/doctors",
+    "sort_order": 0,
+    "is_active": true
+  }
+]

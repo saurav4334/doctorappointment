@@ -1,0 +1,11 @@
+[
+  {
+    "id": "77777777-7777-7777-7777-testimonial01",
+    "patient_name": "Sample Rahim Mia",
+    "review": "Booking was effortless and the doctor was attentive.",
+    "rating": 5,
+    "image_url": "",
+    "is_active": true,
+    "sort_order": 0
+  }
+]

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "33333333-3333-3333-3333-doctors000001",
+    "full_name": "Dr. Sample Ayesha Rahman",
+    "slug": "dr-sample-ayesha-rahman",
+    "title": "MBBS, FCPS",
+    "specializations": ["Cardiology", "Internal Medicine"],
+    "qualifications": ["MBBS", "FCPS (Cardiology)"],
+    "gender": "female",
+    "hospital_name": "Sample Square Hospital, Dhaka",
+    "experience_years": 15,
+    "consultation_fee": 1200,
+    "photo_url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
+    "rating": 4.9,
+    "total_reviews": 240,
+    "bio": "<p>Senior cardiologist with 15 years of experience.</p>",
+    "is_featured": true,
+    "featured_priority": 10,
+    "is_active": true
+  },
+  {
+    "id": "33333333-3333-3333-3333-doctors000002",
+    "full_name": "Dr. Sample Imran Hossain",
+    "slug": "dr-sample-imran-hossain",
+    "title": "MBBS, MD",
+    "specializations": "{Neurology}",
+    "qualifications": "MBBS, MD (Neurology)",
+    "gender": "male",
+    "hospital_name": "Sample United Hospital, Dhaka",
+    "experience_years": 12,
+    "consultation_fee": 1500,
+    "photo_url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80",
+    "rating": 4.8,
+    "total_reviews": 180,
+    "is_featured": false,
+    "featured_priority": 0,
+    "is_active": true
+  }
+]

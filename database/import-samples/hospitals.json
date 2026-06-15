@@ -1,0 +1,21 @@
+[
+  {
+    "id": "22222222-2222-2222-2222-hospitals0001",
+    "name": "Sample Square Hospital",
+    "slug": "sample-square-hospital",
+    "city": "Dhaka",
+    "address": "18 Bir Uttam Qazi Nuruzzaman Rd",
+    "description": "Tertiary care hospital.",
+    "contact_number": "+880 2 8159457",
+    "image_url": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=800&q=80",
+    "status": "approved"
+  },
+  {
+    "id": "22222222-2222-2222-2222-hospitals0002",
+    "name": "Sample United Hospital",
+    "slug": "sample-united-hospital",
+    "city": "Dhaka",
+    "image_url": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+    "status": "approved"
+  }
+]
