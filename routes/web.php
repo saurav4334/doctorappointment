@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DoctorScheduleController;
 use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\AdClickController;
+use App\Http\Controllers\AmbulanceController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\HomeController;
@@ -25,6 +26,7 @@ Route::get('/doctors/{doctor:slug}', [DoctorController::class, 'show'])->name('d
 Route::get('/hospitals', [PublicHospitalController::class, 'index'])->name('hospitals.index');
 Route::get('/hospitals/{hospital:slug}', [PublicHospitalController::class, 'show'])->name('hospitals.show');
 Route::get('/ads/{advertisement}/click', AdClickController::class)->name('ads.click');
+Route::get('/ambulance', [AmbulanceController::class, 'index'])->name('ambulance');
 
 // Authenticated users landing → admin
 Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))

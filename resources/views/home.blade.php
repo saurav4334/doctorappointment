@@ -7,8 +7,15 @@
     {{-- 1. Hero --}}
     <x-hero :slides="$heroSlides" />
 
+    {{-- Appointment search: floats over hero (left) on desktop, sits below on mobile --}}
+    <div class="relative z-20 container mx-auto px-4">
+        <div class="mb-8 max-w-md lg:mb-0 lg:max-w-[400px] lg:-mt-[460px] xl:-mt-[480px]">
+            <x-appointment-search :departments="$departments" :cities="$cities" />
+        </div>
+    </div>
+
     {{-- 2. Advertisement banner (below hero) --}}
-    <x-ad-banner placement="hero_bottom" class="mt-6" />
+    <x-ad-banner placement="hero_bottom" class="mt-6 lg:mt-16" />
 
     {{-- 3. Top Rated Doctors --}}
     @if ($featuredDoctors->isNotEmpty())

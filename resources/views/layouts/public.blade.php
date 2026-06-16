@@ -25,6 +25,7 @@
     @stack('head')
 </head>
 <body class="min-h-screen bg-background font-sans text-foreground">
+    @include('partials.support-bar')
     @include('partials.header')
 
     <main>

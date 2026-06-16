@@ -26,12 +26,17 @@ class HomeController extends Controller
 
         $testimonials = Testimonial::active()->orderBy('sort_order')->limit(6)->get();
 
+        // For the hero appointment-search city dropdown.
+        $cities = Hospital::active()->whereNotNull('city')->where('city', '!=', '')
+            ->distinct()->orderBy('city')->pluck('city');
+
         return view('home', compact(
             'heroSlides',
             'featuredDoctors',
             'departments',
             'hospitals',
             'testimonials',
+            'cities',
         ));
     }
 }

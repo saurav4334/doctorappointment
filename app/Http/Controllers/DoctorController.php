@@ -12,6 +12,7 @@ class DoctorController extends Controller
     {
         $search = trim((string) $request->query('q', ''));
         $departmentSlug = $request->query('department');
+        $city = trim((string) $request->query('city', ''));
         $sort = $request->query('sort', 'rating');
 
         $query = Doctor::active()->with('hospital:id,name,city');
@@ -25,6 +26,11 @@ class DoctorController extends Controller
 
         if ($departmentSlug) {
             $query->whereHas('department', fn ($q) => $q->where('slug', $departmentSlug));
+        }
+
+        // City filter (via the doctor's hospital) — used by the hero search panel.
+        if ($city !== '') {
+            $query->whereHas('hospital', fn ($q) => $q->where('city', $city));
         }
 
         match ($sort) {
