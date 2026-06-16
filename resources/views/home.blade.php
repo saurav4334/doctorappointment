@@ -79,9 +79,10 @@
                                 ? (\Illuminate\Support\Str::startsWith($hospital->image, ['http://','https://']) ? $hospital->image : \Illuminate\Support\Facades\Storage::disk('public')->url($hospital->image))
                                 : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80';
                         @endphp
-                        <div class="overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-lg">
+                        <a href="{{ route('hospitals.show', $hospital->slug) }}"
+                           class="group block overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                             <div class="aspect-[16/9] overflow-hidden bg-muted">
-                                <img src="{{ $himg }}" alt="{{ $hospital->name }}" loading="lazy" class="h-full w-full object-cover" />
+                                <img src="{{ $himg }}" alt="{{ $hospital->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                             </div>
                             <div class="p-5">
                                 <h3 class="font-display text-lg font-semibold text-foreground">{{ $hospital->name }}</h3>
@@ -94,9 +95,17 @@
                                 @if ($hospital->description)
                                     <p class="mt-2 line-clamp-2 text-sm text-muted-foreground">{{ $hospital->description }}</p>
                                 @endif
+                                <span class="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:underline">
+                                    View Doctors
+                                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                                </span>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
+                </div>
+
+                <div class="mt-10 text-center">
+                    <x-btn href="{{ route('hospitals.index') }}" variant="outline">View All Hospitals</x-btn>
                 </div>
             </div>
         </section>

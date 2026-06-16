@@ -3,7 +3,7 @@
         ['label' => 'Home', 'url' => url('/')],
         ['label' => 'Our Doctors', 'url' => url('/doctors')],
         ['label' => 'Departments', 'url' => url('/').'#departments'],
-        ['label' => 'Hospitals', 'url' => url('/').'#hospitals'],
+        ['label' => 'Hospitals', 'url' => route('hospitals.index')],
         ['label' => 'About', 'url' => url('/about')],
         ['label' => 'Contact', 'url' => url('/contact')],
     ];

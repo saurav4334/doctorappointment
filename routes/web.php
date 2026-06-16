@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HospitalController as PublicHospitalController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,8 @@ Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index'
 Route::get('/doctors/{doctor:slug}/slots', [BookingController::class, 'slots'])->name('booking.slots');
 Route::post('/doctors/{doctor:slug}/book', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/doctors/{doctor:slug}', [DoctorController::class, 'show'])->name('doctors.show');
+Route::get('/hospitals', [PublicHospitalController::class, 'index'])->name('hospitals.index');
+Route::get('/hospitals/{hospital:slug}', [PublicHospitalController::class, 'show'])->name('hospitals.show');
 
 // Authenticated users landing → admin
 Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))

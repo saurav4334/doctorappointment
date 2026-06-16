@@ -1,6 +1,8 @@
 @props([
     'doctor',
-    'layout' => 'vertical', // vertical (grid/featured) | horizontal (listing)
+    'layout' => 'vertical',     // vertical (grid/featured) | horizontal (listing)
+    'showSchedule' => false,    // show a weekly availability summary (horizontal)
+    'hospitalContext' => null,  // preserve hospital context in the booking URL
 ])
 
 @php
@@ -9,7 +11,15 @@
     $specialty = $doctor->specializations[0] ?? 'General';
     $hospital = $doctor->hospital_label;
     $fee = rtrim(rtrim(number_format((float) $doctor->consultation_fee, 0), '0'), '.') ?: (int) $doctor->consultation_fee;
-    $url = route('doctors.show', $doctor->slug);
+    $url = route('doctors.show', $doctor->slug).($hospitalContext ? '?hospital='.$hospitalContext : '');
+
+    $scheduleSummary = null;
+    if ($showSchedule && $doctor->relationLoaded('schedules')) {
+        $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        $scheduleSummary = $doctor->schedules
+            ->pluck('day_of_week')->unique()->sort()
+            ->map(fn ($d) => $dayNames[$d] ?? null)->filter()->implode(', ') ?: null;
+    }
 @endphp
 
 @if ($layout === 'horizontal')
@@ -34,6 +44,12 @@
                 </div>
                 @if ($hospital)
                     <p class="mt-2 text-sm text-muted-foreground">{{ $hospital }}</p>
+                @endif
+                @if ($scheduleSummary)
+                    <p class="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                        <svg class="h-3.5 w-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0V11.25A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+                        Available: {{ $scheduleSummary }}
+                    </p>
                 @endif
             </div>
         </div>
