@@ -30,6 +30,11 @@
         </div>
     </div>
 
+    {{-- Top advertisement banner --}}
+    <div class="container mx-auto px-4 pt-4">
+        <x-ad-banner placement="doctor_details_top" />
+    </div>
+
     <div class="container mx-auto px-4 py-8 md:py-12">
         <div class="grid gap-8 lg:grid-cols-3">
             {{-- Main --}}

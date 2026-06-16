@@ -16,6 +16,10 @@ class AdvertisementController extends Controller
         'hero_bottom' => 'Hero Bottom Banner (1200×240)',
         'mid_homepage' => 'Mid Homepage Banner (1200×260)',
         'footer_banner' => 'Footer Sponsor Strip (1200×120)',
+        'doctor_listing_left' => 'Doctor Listing — Left Sidebar (400×600)',
+        'doctor_listing_right' => 'Doctor Listing — Right Sidebar (400×600)',
+        'doctor_details_top' => 'Doctor Details — Top Banner (490×70)',
+        'hospital_details_top' => 'Hospital Details — Top Banner (490×70)',
         'sidebar' => 'Sidebar (300×600)',
     ];
 

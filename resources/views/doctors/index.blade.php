@@ -37,31 +37,55 @@
         </div>
     </section>
 
-    {{-- Results --}}
+    {{-- Results + sidebar advertisements --}}
     <section class="py-12 md:py-16">
         <div class="container mx-auto px-4">
-            <div class="mb-6 flex items-center justify-between">
-                <p class="text-muted-foreground">
-                    Showing <span class="font-semibold text-foreground">{{ $doctors->total() }}</span> doctors
-                </p>
+            @php
+                $adLeft = \App\Models\Advertisement::liveFor('doctor_listing_left');
+                $adRight = \App\Models\Advertisement::liveFor('doctor_listing_right');
+            @endphp
+
+            <div class="lg:flex lg:items-start lg:gap-6">
+                {{-- Left sidebar ad (horizontal banner on mobile, sticky sidebar on desktop) --}}
+                @if ($adLeft)
+                    <aside class="mb-6 lg:mb-0 lg:sticky lg:top-24 lg:w-[200px] lg:shrink-0">
+                        <x-ad-banner placement="doctor_listing_left" />
+                    </aside>
+                @endif
+
+                {{-- Center content --}}
+                <div class="min-w-0 flex-1">
+                    <div class="mb-6 flex items-center justify-between">
+                        <p class="text-muted-foreground">
+                            Showing <span class="font-semibold text-foreground">{{ $doctors->total() }}</span> doctors
+                        </p>
+                    </div>
+
+                    @if ($doctors->isNotEmpty())
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                            @foreach ($doctors as $doctor)
+                                <x-doctor-card :doctor="$doctor" layout="horizontal" />
+                            @endforeach
+                        </div>
+
+                        <div class="mt-10">
+                            {{ $doctors->links() }}
+                        </div>
+                    @else
+                        <div class="py-16 text-center">
+                            <p class="text-lg text-muted-foreground">No doctors found matching your criteria.</p>
+                            <x-btn href="{{ route('doctors.index') }}" variant="outline" class="mt-4">Clear Filters</x-btn>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Right sidebar ad --}}
+                @if ($adRight)
+                    <aside class="mt-8 lg:mt-0 lg:sticky lg:top-24 lg:w-[200px] lg:shrink-0">
+                        <x-ad-banner placement="doctor_listing_right" />
+                    </aside>
+                @endif
             </div>
-
-            @if ($doctors->isNotEmpty())
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($doctors as $doctor)
-                        <x-doctor-card :doctor="$doctor" layout="horizontal" />
-                    @endforeach
-                </div>
-
-                <div class="mt-10">
-                    {{ $doctors->links() }}
-                </div>
-            @else
-                <div class="py-16 text-center">
-                    <p class="text-lg text-muted-foreground">No doctors found matching your criteria.</p>
-                    <x-btn href="{{ route('doctors.index') }}" variant="outline" class="mt-4">Clear Filters</x-btn>
-                </div>
-            @endif
         </div>
     </section>
 @endsection

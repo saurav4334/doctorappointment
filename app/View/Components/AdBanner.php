@@ -20,40 +20,42 @@ class AdBanner extends Component
      * subtle and balanced instead of oversized).
      */
     protected array $sizeClasses = [
-        'hero_bottom'   => 'h-[90px] md:h-[160px]',   // slim sponsor banner
-        'mid_homepage'  => 'h-[110px] md:h-[180px]',  // compact landscape banner
-        'footer_banner' => 'h-[60px] md:h-[80px]',    // slim sponsor strip
-        'sidebar'       => 'aspect-[300/600]',
+        'hero_bottom'          => 'h-[90px] md:h-[160px]',     // slim sponsor banner
+        'mid_homepage'         => 'h-[110px] md:h-[180px]',    // compact landscape banner
+        'footer_banner'        => 'h-[60px] md:h-[80px]',      // slim sponsor strip
+        'sidebar'              => 'aspect-[300/600]',
+        // New: tall sidebars on desktop, horizontal responsive banners on mobile.
+        'doctor_listing_left'  => 'h-[110px] lg:h-[600px]',
+        'doctor_listing_right' => 'h-[110px] lg:h-[600px]',
+        // New: wide-short top banners (~490x70), responsive.
+        'doctor_details_top'   => 'h-[64px] md:h-[70px]',
+        'hospital_details_top' => 'h-[64px] md:h-[70px]',
     ];
+
+    /** Placements positioned by the page itself (no auto content container). */
+    protected array $bare = ['sidebar', 'doctor_listing_left', 'doctor_listing_right', 'doctor_details_top', 'hospital_details_top'];
+
+    public bool $isBare;
 
     public function __construct(public string $placement)
     {
-        $this->ad = Advertisement::live()->placement($placement)->first();
+        $this->ad = Advertisement::liveFor($placement);
         $this->sizeClass = $this->sizeClasses[$placement] ?? $this->sizeClasses['mid_homepage'];
+        $this->isBare = in_array($placement, $this->bare, true);
 
         if ($this->ad) {
+            $this->ad->recordImpression();
+
             $this->imageUrl = Str::startsWith($this->ad->image, ['http://', 'https://'])
                 ? $this->ad->image
                 : Storage::disk('public')->url($this->ad->image);
-            $this->href = $this->sanitizeUrl($this->ad->redirect_url);
-            $this->external = $this->href !== null && ! Str::startsWith($this->href, '/');
+
+            // Clicks go through a tracking redirect (records click_count + last_clicked_at).
+            $this->href = $this->ad->safeRedirectUrl() ? route('ads.click', $this->ad->id) : null;
+            $this->external = $this->ad->isExternalRedirect();
         }
     }
 
-    /** Allow only internal paths or http(s) URLs (block javascript:, data:, etc.). */
-    protected function sanitizeUrl(?string $url): ?string
-    {
-        if (! $url) {
-            return null;
-        }
-        $url = trim($url);
-        if (Str::startsWith($url, '/')) {
-            return $url;
-        }
-        $scheme = parse_url($url, PHP_URL_SCHEME);
-
-        return in_array($scheme, ['http', 'https'], true) ? $url : null;
-    }
 
     public function shouldRender(): bool
     {

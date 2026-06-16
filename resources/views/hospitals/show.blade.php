@@ -26,6 +26,11 @@
         </div>
     </div>
 
+    {{-- Top advertisement banner --}}
+    <div class="container mx-auto px-4 pt-4">
+        <x-ad-banner placement="hospital_details_top" />
+    </div>
+
     {{-- Hospital header --}}
     <section class="container mx-auto px-4 py-8 md:py-10">
         <div class="grid gap-6 md:grid-cols-3">

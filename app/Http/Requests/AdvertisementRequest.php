@@ -28,7 +28,7 @@ class AdvertisementRequest extends FormRequest
             // GIFs validate cleanly; stored as-is (no resize) to preserve animation.
             'image' => [...$imageRule, 'file', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
             'redirect_url' => ['nullable', 'string', 'max:500'],
-            'placement' => ['required', Rule::in(['hero_bottom', 'mid_homepage', 'sidebar', 'footer_banner'])],
+            'placement' => ['required', Rule::in(array_keys(\App\Http\Controllers\Admin\AdvertisementController::PLACEMENTS))],
             'is_active' => ['boolean'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
