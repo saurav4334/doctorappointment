@@ -141,7 +141,7 @@ class SmsModuleTest extends TestCase
             'api_base_url' => 'https://portal.notifybd.com/api/v1/sms/send',
             'api_key' => '', // blank → keep existing
             'sender_id' => 'NewSender', 'sms_type' => 'text', 'default_country_code' => '880', 'enabled' => 1,
-        ])->assertRedirect(route('admin.sms-settings.edit'));
+        ])->assertRedirect(route('admin.sms-settings.edit', ['tab' => 'api']));
 
         $settings = SmsSetting::current();
         $this->assertSame('keep-me', $settings->api_key);
@@ -161,6 +161,28 @@ class SmsModuleTest extends TestCase
         $this->assertDatabaseHas('sms_logs', ['event_type' => 'test', 'status' => 'sent']);
     }
 
+    public function test_unified_page_shows_all_tabs(): void
+    {
+        $this->seed(SmsTemplateSeeder::class);
+        $this->actingAs($this->userWithRole('super_admin'));
+
+        $this->get(route('admin.sms-settings.edit'))
+            ->assertOk()
+            ->assertSee('API Configuration')
+            ->assertSee('SMS Templates')
+            ->assertSee('SMS Logs')
+            ->assertSee('Test SMS')
+            ->assertSee('Available Variables');
+    }
+
+    public function test_old_sms_routes_redirect_to_tabs(): void
+    {
+        $this->actingAs($this->userWithRole('super_admin'));
+
+        $this->get('/admin/sms-templates')->assertRedirect(route('admin.sms-settings.edit', ['tab' => 'templates']));
+        $this->get('/admin/sms-logs')->assertRedirect(route('admin.sms-settings.edit', ['tab' => 'logs']));
+    }
+
     public function test_admin_can_edit_template(): void
     {
         $this->seed(SmsTemplateSeeder::class);
@@ -169,7 +191,7 @@ class SmsModuleTest extends TestCase
 
         $this->put(route('admin.sms-templates.update', $template), [
             'title' => 'Approved', 'body' => 'Hi {patient_name}, approved.', 'is_active' => 1,
-        ])->assertRedirect(route('admin.sms-templates.index'));
+        ])->assertRedirect(route('admin.sms-settings.edit', ['tab' => 'templates']));
 
         $this->assertDatabaseHas('sms_templates', ['event' => 'appointment_approved', 'body' => 'Hi {patient_name}, approved.']);
     }

@@ -33,6 +33,6 @@ class SmsTemplateController extends Controller
 
         $smsTemplate->update($data);
 
-        return redirect()->route('admin.sms-templates.index')->with('success', 'Template saved.');
+        return redirect()->route('admin.sms-settings.edit', ['tab' => 'templates'])->with('success', 'Template saved.');
     }
 }
