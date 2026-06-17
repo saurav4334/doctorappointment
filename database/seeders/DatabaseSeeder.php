@@ -32,5 +32,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(NotificationTemplateSeeder::class);
         $this->call(DemoContentSeeder::class);
+        $this->call(MarketplaceBlocksSeeder::class);
     }
 }

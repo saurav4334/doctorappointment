@@ -118,6 +118,45 @@
         </section>
     @endif
 
+    {{-- Healthcare Services Around You --}}
+    @if ($healthcareServices->isNotEmpty())
+        <section class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                    <x-section-title eyebrow="What We Offer" title="Healthcare Services Around You"
+                        subtitle="From appointments to home care — find the right service fast." />
+                    <x-btn href="{{ route('services.index') }}" variant="outline">View All Services</x-btn>
+                </div>
+                <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($healthcareServices as $service)
+                        <x-service-card :service="$service" />
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Statistics counter --}}
+    @if ($statCounters->isNotEmpty())
+        <section class="hero-gradient py-14 md:py-20">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
+                    @foreach ($statCounters as $counter)
+                        <div class="text-center text-white"
+                             x-data="{ shown: 0, target: {{ (int) $counter->value }} }"
+                             x-init="(() => { const dur = 1500, start = performance.now(); const step = (t) => { const p = Math.min(1, (t - start) / dur); shown = Math.floor(p * target); if (p < 1) requestAnimationFrame(step); else shown = target; }; requestAnimationFrame(step); })()">
+                            @if ($counter->icon)<div class="mb-2 text-3xl">{{ $counter->icon }}</div>@endif
+                            <div class="font-display text-3xl font-bold md:text-4xl">
+                                <span x-text="shown.toLocaleString()">0</span>{{ $counter->suffix }}
+                            </div>
+                            <p class="mt-1 text-sm text-white/80">{{ $counter->title }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- 6. Testimonials --}}
     @if ($testimonials->isNotEmpty())
         <section class="bg-muted/40 py-16 md:py-24">
@@ -152,8 +191,40 @@
     @endif
 
     {{-- Footer banner ad + CTA --}}
+    {{-- Corporate clients auto-slider --}}
+    @if ($corporateClients->isNotEmpty())
+        <section class="border-y border-border bg-muted/30 py-12">
+            <div class="container mx-auto px-4">
+                <p class="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground">Trusted by leading organizations</p>
+                <div class="group mt-8 overflow-hidden">
+                    <div class="flex w-max items-center gap-12 animate-[marquee_30s_linear_infinite] group-hover:[animation-play-state:paused]">
+                        @foreach ($corporateClients->concat($corporateClients) as $client)
+                            @php
+                                $logo = $client->logo
+                                    ? (\Illuminate\Support\Str::startsWith($client->logo, ['http://','https://']) ? $client->logo : \Illuminate\Support\Facades\Storage::disk('public')->url($client->logo))
+                                    : null;
+                            @endphp
+                            <a href="{{ $client->website_url ?: '#' }}" @if ($client->website_url) target="_blank" rel="noopener noreferrer nofollow" @endif
+                               class="flex h-12 w-32 shrink-0 items-center justify-center opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0" title="{{ $client->name }}">
+                                @if ($logo)
+                                    <img src="{{ $logo }}" alt="{{ $client->name }}" loading="lazy" class="max-h-12 max-w-full object-contain">
+                                @else
+                                    <span class="text-sm font-semibold text-muted-foreground">{{ $client->name }}</span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     <x-cta-section />
 
     {{-- Footer sponsor strip (after CTA, just before the footer) --}}
     <x-ad-banner placement="footer_banner" class="mb-8" />
+
+    @push('head')
+        <style>@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }</style>
+    @endpush
 @endsection

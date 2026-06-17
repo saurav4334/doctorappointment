@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CorporateClient;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\HeroSlide;
+use App\Models\HomeService;
 use App\Models\Hospital;
+use App\Models\StatCounter;
 use App\Models\Testimonial;
 
 class HomeController extends Controller
@@ -30,6 +33,10 @@ class HomeController extends Controller
         $cities = Hospital::active()->whereNotNull('city')->where('city', '!=', '')
             ->distinct()->orderBy('city')->pluck('city');
 
+        $healthcareServices = HomeService::active()->limit(9)->get();
+        $statCounters = StatCounter::active()->get();
+        $corporateClients = CorporateClient::active()->get();
+
         return view('home', compact(
             'heroSlides',
             'featuredDoctors',
@@ -37,6 +44,9 @@ class HomeController extends Controller
             'hospitals',
             'testimonials',
             'cities',
+            'healthcareServices',
+            'statCounters',
+            'corporateClients',
         ));
     }
 }

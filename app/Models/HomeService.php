@@ -11,7 +11,10 @@ class HomeService extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'description',
+        'benefits',
+        'contact_phone',
         'icon',
         'image',
         'is_active',
@@ -22,6 +25,16 @@ class HomeService extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function requests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceRequest::class);
+    }
 
     public function scopeActive($query)
     {
