@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\CorporateClientController;
 use App\Http\Controllers\Admin\HealthcareServiceController;
 use App\Http\Controllers\Admin\HospitalController;
 use App\Http\Controllers\Admin\ServiceRequestController;
+use App\Http\Controllers\Admin\SmsLogController;
+use App\Http\Controllers\Admin\SmsSettingController;
+use App\Http\Controllers\Admin\SmsTemplateController;
 use App\Http\Controllers\Admin\StatCounterController;
 use App\Http\Controllers\AdClickController;
 use App\Http\Controllers\ServiceController;
@@ -64,6 +67,15 @@ Route::middleware(['auth', 'role:super_admin|admin'])
         Route::get('service-requests', [ServiceRequestController::class, 'index'])->name('service-requests.index');
         Route::patch('service-requests/{serviceRequest}/status', [ServiceRequestController::class, 'setStatus'])->name('service-requests.set-status');
         Route::delete('service-requests/{serviceRequest}', [ServiceRequestController::class, 'destroy'])->name('service-requests.destroy');
+
+        // SMS module
+        Route::get('sms-settings', [SmsSettingController::class, 'edit'])->name('sms-settings.edit');
+        Route::put('sms-settings', [SmsSettingController::class, 'update'])->name('sms-settings.update');
+        Route::post('sms-settings/test', [SmsSettingController::class, 'test'])->name('sms-settings.test');
+        Route::get('sms-templates', [SmsTemplateController::class, 'index'])->name('sms-templates.index');
+        Route::get('sms-templates/{smsTemplate}/edit', [SmsTemplateController::class, 'edit'])->name('sms-templates.edit');
+        Route::put('sms-templates/{smsTemplate}', [SmsTemplateController::class, 'update'])->name('sms-templates.update');
+        Route::get('sms-logs', [SmsLogController::class, 'index'])->name('sms-logs.index');
     });
 
 Route::middleware('auth')->group(function () {

@@ -21,11 +21,12 @@ class ServiceController extends Controller
         return view('services.show', ['service' => $homeService]);
     }
 
-    public function storeRequest(ServiceBookingRequest $request, HomeService $homeService)
+    public function storeRequest(ServiceBookingRequest $request, HomeService $homeService, \App\Services\Sms\SmsService $sms)
     {
         abort_unless($homeService->is_active, 404);
 
-        $homeService->requests()->create($request->validated() + ['status' => 'pending']);
+        $serviceRequest = $homeService->requests()->create($request->validated() + ['status' => 'pending']);
+        $sms->serviceRequestReceived($serviceRequest->load('service'));
 
         return back()->with('service_success', 'Your request has been received. Our team will contact you shortly.');
     }

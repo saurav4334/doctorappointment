@@ -80,10 +80,11 @@ class BookingTest extends TestCase
     {
         $this->post(route('booking.store', $this->doctor->slug), $this->payload());
 
-        // appointment_requested fires sms + email (both enabled by default → mock_sent).
+        // appointment_requested fires the mock email channel (real SMS is handled
+        // separately by the dedicated SMS module — see SmsModuleTest).
         $this->assertDatabaseHas('notification_logs', [
             'event' => 'appointment_requested',
-            'channel' => 'sms',
+            'channel' => 'email',
             'status' => 'mock_sent',
         ]);
         $this->assertTrue(

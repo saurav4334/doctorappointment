@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Services\Notifications\AppointmentNotificationService;
 use App\Services\Scheduling\SlotService;
+use App\Services\Sms\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ class BookingController extends Controller
     public function __construct(
         protected SlotService $slots,
         protected AppointmentNotificationService $notifications,
+        protected SmsService $sms,
     ) {}
 
     /** AJAX: available slots for a doctor on a date. */
@@ -80,6 +82,7 @@ class BookingController extends Controller
         }
 
         $this->notifications->appointmentRequested($appointment);
+        $this->sms->appointmentRequested($appointment);
 
         return redirect()
             ->route('doctors.show', $doctor->slug)

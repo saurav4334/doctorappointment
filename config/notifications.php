@@ -24,12 +24,15 @@ return [
     | Which channels fire for each appointment event. Add/remove channel keys
     | here without touching any appointment code.
     */
+    // NOTE: 'sms' is intentionally omitted — real SMS is handled by the
+    // dedicated SMS module (App\Services\Sms\SmsService / NotifyBD). These
+    // channels remain mock until wired to real providers.
     'events' => [
-        'appointment_requested' => ['sms', 'email'],
-        'appointment_approved' => ['sms', 'email'],
-        'appointment_rejected' => ['sms', 'email'],
+        'appointment_requested' => ['email'],
+        'appointment_approved' => ['email'],
+        'appointment_rejected' => ['email'],
         'appointment_completed' => ['email'],
-        'appointment_reminder' => ['sms'],
+        'appointment_reminder' => ['email'],
         'schedule_changed' => ['email'],
     ],
 

@@ -15,6 +15,10 @@
             'paid'       => 'bg-green-100 text-green-700',
             'unpaid'     => 'bg-muted text-muted-foreground',
             'refunded'   => 'bg-amber-100 text-amber-700',
+            'sent'       => 'bg-green-100 text-green-700',
+            'failed'     => 'bg-red-100 text-red-700',
+            'skipped'    => 'bg-muted text-muted-foreground',
+            'contacted'  => 'bg-blue-100 text-blue-700',
         ];
         $text = ucfirst((string) $status);
         $class = $map[$status] ?? 'bg-muted text-muted-foreground';
