@@ -323,7 +323,7 @@
                                         <td class="px-5 py-3 text-muted-foreground">{{ $log->appointment_id ? 'AP-'.$log->appointment_id : '—' }}</td>
                                         <td class="px-5 py-3 text-muted-foreground">{{ $log->dtmf_response ?? '—' }}</td>
                                         <td class="px-5 py-3"><x-admin.status-badge :status="$log->status" />
-                                            @if ($log->error_message)<span class="mt-1 block text-xs text-destructive">{{ \Illuminate\Support\Str::limit($log->error_message, 40) }}</span>@endif
+                                            @if ($log->error_message)<span class="mt-1 block max-w-md break-words text-xs text-destructive">{{ $log->error_message }}</span>@endif
                                         </td>
                                         <td class="px-5 py-3 text-xs text-muted-foreground">{{ $log->created_at?->format('d M Y H:i') }}</td>
                                     </tr>

@@ -4,6 +4,7 @@ namespace App\Services\VoiceCall;
 
 use App\Models\VoiceCallSetting;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 /**
  * Protiddhoni direct-TTS client. Never throws for normal failures — returns a
@@ -26,7 +27,10 @@ class ProtiddhoniVoiceProvider
             $json = $response->json();
 
             if (! $response->successful()) {
-                return ['ok' => false, 'response' => $json ?? $response->body(), 'error' => "HTTP {$response->status()}"];
+                // Surface the provider's validation detail (e.g. 422 field errors) so it's visible in logs/UI.
+                $detail = is_array($json) ? json_encode($json, JSON_UNESCAPED_UNICODE) : (string) $response->body();
+
+                return ['ok' => false, 'response' => $json ?? $response->body(), 'error' => "HTTP {$response->status()}: ".Str::limit($detail, 500)];
             }
 
             if (is_array($json) && isset($json['success']) && $json['success'] === false) {

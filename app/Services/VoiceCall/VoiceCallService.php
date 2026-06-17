@@ -119,14 +119,17 @@ class VoiceCallService
             'question_texts' => array_values(array_filter([$texts['question']])),
             'start_texts' => array_values(array_filter([$texts['start']])),
             'end_texts' => array_values(array_filter([$texts['end']])),
-            'metadata' => ['booking_id' => $appointmentId ? 'AP-'.$appointmentId : null, 'source' => 'doctorsappointmentbd'],
+            'metadata' => ['booking_id' => $appointmentId ? 'AP-'.$appointmentId : 'TEST', 'source' => 'doctorsappointmentbd'],
         ];
 
         if ($settings->dtmf_enabled) {
-            $payload['dtmf_options'] = array_values(array_filter([
+            $dtmf = array_values(array_filter([
                 $texts['dtmf1'] ? ['key' => '1', 'option_type' => 'voice', 'texts' => [$texts['dtmf1']]] : null,
                 $texts['dtmf2'] ? ['key' => '2', 'option_type' => 'voice', 'texts' => [$texts['dtmf2']]] : null,
             ]));
+            if ($dtmf) { // omit the key entirely rather than sending an empty array
+                $payload['dtmf_options'] = $dtmf;
+            }
         }
 
         $log = VoiceCallLog::create([
