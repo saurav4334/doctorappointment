@@ -37,8 +37,8 @@
 
     <div class="container mx-auto px-4 py-8 md:py-12">
         <div class="grid gap-8 lg:grid-cols-3">
-            {{-- Main --}}
-            <div class="lg:col-span-2">
+            {{-- Header (image + basic info) --}}
+            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1">
                 {{-- Header card --}}
                 <div class="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 md:flex-row">
                     <div class="relative h-40 w-40 shrink-0 overflow-hidden rounded-xl md:h-48 md:w-48">
@@ -82,7 +82,11 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
+            {{-- Details: about, qualifications, specializations, schedule
+                 (on mobile this comes AFTER the booking form) --}}
+            <div class="order-3 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-start-2">
                 {{-- About --}}
                 @if ($doctor->bio)
                     <div class="mt-6 rounded-xl border border-border bg-card p-6">
@@ -146,8 +150,8 @@
                 @endif
             </div>
 
-            {{-- Booking sidebar --}}
-            <div class="lg:col-span-1" id="booking">
+            {{-- Booking sidebar (on mobile this sits right after the header) --}}
+            <div class="order-2 lg:order-none lg:col-start-3 lg:row-start-1 lg:row-span-2" id="booking">
                 <div class="sticky top-24 rounded-xl border border-border bg-card p-5 shadow-sm"
                      x-data="bookingForm({
                         slotsUrl: '{{ route('booking.slots', $doctor->slug) }}',

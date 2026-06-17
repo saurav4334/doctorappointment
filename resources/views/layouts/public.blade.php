@@ -24,7 +24,7 @@
     <style>[x-cloak]{display:none !important;}</style>
     @stack('head')
 </head>
-<body class="min-h-screen bg-background font-sans text-foreground">
+<body class="min-h-screen overflow-x-hidden bg-background font-sans text-foreground">
     @include('partials.support-bar')
     @include('partials.header')
 

@@ -41,7 +41,7 @@
         prev() { this.current = (this.current - 1 + this.count) % this.count; },
         go(i) { this.current = i; },
     }"
-    class="relative h-[600px] overflow-hidden md:h-[700px] lg:h-[85vh]">
+    class="relative h-[420px] overflow-hidden sm:h-[500px] md:h-[600px] lg:h-[80vh]">
 
     @foreach ($items as $index => $slide)
         <div x-show="current === {{ $index }}" x-transition.opacity.duration.1000ms class="absolute inset-0">

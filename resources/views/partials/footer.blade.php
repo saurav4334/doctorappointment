@@ -7,7 +7,7 @@
         <div class="container mx-auto px-4 py-10 md:py-14">
             <div class="grid items-start gap-8 md:grid-cols-3">
                 {{-- Brand --}}
-                <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center gap-4 md:justify-start">
                     <a href="{{ url('/') }}">
                         <img src="{{ asset('logo.png') }}" alt="Doctors AppointmentBD" class="h-14 object-contain" />
                     </a>
@@ -30,10 +30,10 @@
                 </div>
 
                 {{-- Contact --}}
-                <div class="space-y-2 text-right text-sm text-primary-foreground/85">
+                <div class="space-y-2 text-center text-sm text-primary-foreground/85 md:text-right">
                     <p class="font-semibold text-primary-foreground">Contact:</p>
-                    <a href="tel:+8801720003113" class="flex items-center justify-end gap-2 hover:underline">+880 1720 003113</a>
-                    <a href="tel:+8801771588599" class="flex items-center justify-end gap-2 hover:underline">+880 1771 588599</a>
+                    <a href="tel:+8801720003113" class="flex items-center justify-center gap-2 hover:underline md:justify-end">+880 1720 003113</a>
+                    <a href="tel:+8801771588599" class="flex items-center justify-center gap-2 hover:underline md:justify-end">+880 1771 588599</a>
                 </div>
             </div>
         </div>
