@@ -9,6 +9,7 @@ use App\Models\Doctor;
 use App\Models\Hospital;
 use App\Services\Notifications\AppointmentNotificationService;
 use App\Services\Sms\SmsService;
+use App\Services\VoiceCall\VoiceCallService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -19,6 +20,7 @@ class AppointmentController extends Controller
     public function __construct(
         protected AppointmentNotificationService $notifications,
         protected SmsService $sms,
+        protected VoiceCallService $voice,
     ) {}
 
     public function index(Request $request)
@@ -94,6 +96,7 @@ class AppointmentController extends Controller
         if ($appointment->status !== $previousStatus) {
             $this->notifications->statusChanged($appointment, $appointment->status);
             $this->sms->appointmentStatusChanged($appointment, $appointment->status);
+            $this->voice->appointmentStatusChanged($appointment, $appointment->status);
         }
 
         return redirect()->route('admin.appointments.index')->with('success', 'Appointment updated.');
@@ -110,6 +113,7 @@ class AppointmentController extends Controller
             $appointment->update(['status' => $data['status']]);
             $this->notifications->statusChanged($appointment, $data['status']);
             $this->sms->appointmentStatusChanged($appointment, $data['status']);
+            $this->voice->appointmentStatusChanged($appointment, $data['status']);
         }
 
         return back()->with('success', 'Appointment marked as '.$data['status'].'.');

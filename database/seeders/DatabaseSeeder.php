@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(NotificationTemplateSeeder::class);
         $this->call(SmsTemplateSeeder::class);
+        $this->call(VoiceCallTemplateSeeder::class);
         $this->call(DemoContentSeeder::class);
         $this->call(MarketplaceBlocksSeeder::class);
     }

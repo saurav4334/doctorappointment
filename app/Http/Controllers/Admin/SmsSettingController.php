@@ -7,17 +7,20 @@ use App\Http\Requests\SmsSettingsRequest;
 use App\Models\SmsLog;
 use App\Models\SmsSetting;
 use App\Models\SmsTemplate;
+use App\Models\VoiceCallLog;
+use App\Models\VoiceCallSetting;
+use App\Models\VoiceCallTemplate;
 use App\Services\Sms\SmsService;
+use App\Services\VoiceCall\VoiceCallService;
 use Illuminate\Http\Request;
 
 class SmsSettingController extends Controller
 {
-    /** Unified SMS page: API config + Templates + Logs + Test, as tabs. */
+    /** Unified Notification page: SMS (config/templates/logs/test) + Voice Call tabs. */
     public function edit(Request $request)
     {
-        $tab = in_array($request->query('tab'), ['api', 'templates', 'logs', 'test'], true)
-            ? $request->query('tab')
-            : 'api';
+        $tabs = ['api', 'templates', 'logs', 'test', 'voice', 'voice_templates', 'voice_logs', 'voice_test'];
+        $tab = in_array($request->query('tab'), $tabs, true) ? $request->query('tab') : 'api';
 
         // Logs (filterable) for the Logs tab.
         $logs = SmsLog::query()
@@ -27,8 +30,21 @@ class SmsSettingController extends Controller
             ->when($request->filled('from'), fn ($q) => $q->whereDate('created_at', '>=', $request->query('from')))
             ->when($request->filled('to'), fn ($q) => $q->whereDate('created_at', '<=', $request->query('to')))
             ->latest()
-            ->paginate(15)
+            ->paginate(15, ['*'], 'sms_page')
             ->withQueryString();
+
+        // Voice call logs (separate filter params so both log tabs coexist).
+        $voiceLogs = VoiceCallLog::query()
+            ->when($request->filled('vq'), fn ($q) => $q->where('recipient_number', 'like', '%'.$request->query('vq').'%'))
+            ->when($request->filled('vstatus'), fn ($q) => $q->where('status', $request->query('vstatus')))
+            ->when($request->filled('vappt'), fn ($q) => $q->where('appointment_id', $request->query('vappt')))
+            ->when($request->filled('vfrom'), fn ($q) => $q->whereDate('created_at', '>=', $request->query('vfrom')))
+            ->when($request->filled('vto'), fn ($q) => $q->whereDate('created_at', '<=', $request->query('vto')))
+            ->latest()
+            ->paginate(15, ['*'], 'voice_page')
+            ->withQueryString();
+
+        $statusOptions = ['' => 'All Status', 'pending' => 'Pending', 'sent' => 'Sent', 'failed' => 'Failed', 'skipped' => 'Skipped'];
 
         return view('admin.sms.settings', [
             'tab' => $tab,
@@ -41,8 +57,20 @@ class SmsSettingController extends Controller
             'event' => (string) $request->query('event', ''),
             'from' => (string) $request->query('from', ''),
             'to' => (string) $request->query('to', ''),
-            'statusOptions' => ['' => 'All Status', 'pending' => 'Pending', 'sent' => 'Sent', 'failed' => 'Failed', 'skipped' => 'Skipped'],
+            'statusOptions' => $statusOptions,
             'eventOptions' => ['' => 'All Events'] + SmsService::EVENTS + ['test' => 'Test SMS'],
+
+            // Voice call
+            'voiceSettings' => VoiceCallSetting::current(),
+            'voiceTemplates' => VoiceCallTemplate::orderBy('event')->get(),
+            'voicePlaceholders' => VoiceCallService::PLACEHOLDERS,
+            'voiceLogs' => $voiceLogs,
+            'vsearch' => (string) $request->query('vq', ''),
+            'vstatus' => (string) $request->query('vstatus', ''),
+            'vappt' => (string) $request->query('vappt', ''),
+            'vfrom' => (string) $request->query('vfrom', ''),
+            'vto' => (string) $request->query('vto', ''),
+            'voiceStatusOptions' => $statusOptions,
         ]);
     }
 

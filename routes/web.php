@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ServiceRequestController;
 use App\Http\Controllers\Admin\SmsSettingController;
 use App\Http\Controllers\Admin\SmsTemplateController;
 use App\Http\Controllers\Admin\StatCounterController;
+use App\Http\Controllers\Admin\VoiceCallController;
 use App\Http\Controllers\AdClickController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\AmbulanceController;
@@ -76,6 +77,11 @@ Route::middleware(['auth', 'role:super_admin|admin'])
         // Backward-compatible redirects into the relevant tab.
         Route::get('sms-templates', fn () => redirect()->route('admin.sms-settings.edit', ['tab' => 'templates']))->name('sms-templates.index');
         Route::get('sms-logs', fn () => redirect()->route('admin.sms-settings.edit', ['tab' => 'logs']))->name('sms-logs.index');
+
+        // Voice call (same unified page, separate tabs)
+        Route::put('voice-settings', [VoiceCallController::class, 'update'])->name('voice-settings.update');
+        Route::post('voice-settings/test', [VoiceCallController::class, 'test'])->name('voice-settings.test');
+        Route::put('voice-templates/{voiceCallTemplate}', [VoiceCallController::class, 'updateTemplate'])->name('voice-templates.update');
     });
 
 Route::middleware('auth')->group(function () {
